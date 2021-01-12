@@ -129,5 +129,6 @@ dmypy.json
 .pyre/
 
 # Everything else
-
+/bot-env/
+bot-env/Scripts/
 .vscode/
