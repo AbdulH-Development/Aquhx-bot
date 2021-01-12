@@ -1,7 +1,7 @@
 import os
 import time
 import sys
-import aiosqlite
+import sqlite3
 from colorama import Fore
 
 sys.dont_write_bytecode = True
@@ -9,9 +9,9 @@ def __load__(client):
     """
     Load your extensions
     """
-    db = await aiosqlite.connect("main.py")
-    cursor = await db.cursor()
-    await cursor.execute(
+    db = sqlite3.connect("main.py")
+    cursor = db.cursor()
+    cursor.execute(
         """
         CREATE TABLE IF NOT EXISTS portal(
             guild_id TEXT,
@@ -20,7 +20,7 @@ def __load__(client):
             goodbye TEXT
         )
         """)
-    await cursor.execute(
+    cursor.execute(
         """
         CREATE TABLE IF NOT EXISTS logs(
             guild_id TEXT,
