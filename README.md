@@ -20,7 +20,7 @@ python-dotenv,
 discord.py[voice],
 lavalink,
 praw,
-colorama.
+colorama(optional).
 
 -----
 
