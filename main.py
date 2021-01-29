@@ -9,8 +9,13 @@ import sys
 from Modules.__loader__ import __load__
 
 # Secondary imports
-
-from colorama import Fore
+#colorama is optional, if you dont have colorama the bot will disable it
+iscolorama = True
+try:
+    from colorama import Fore
+except ImportError:
+    iscolorama = False
+    print("Colorama not installed, or something went wrong when importing, turning all colorama feature off.")
 from dotenv import load_dotenv
 from discord.ext import commands
 
