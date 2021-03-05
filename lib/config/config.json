@@ -1,0 +1,26 @@
+{
+    "Creation date": "2021-03-03, 7:50 PM CST",
+    "Owner": "Abdul H",
+    "Collaboraters": "Mossyegghead01",
+    "Version": "1.0.0",
+    "Website": "https://abdulh.xyz/",
+    "scripts": {
+        "start": "python main.py"
+    },
+    "Git repository": "https://github.com/AbdulH-Development/Aquhx-bot",
+    "Issues": "https://github.com/AbdulH-Development/Aquhx-bot/issues",
+    "Dependancies": {
+        "discord.py": "https://pypi.org/project/discord.py/",
+        "lavalink": "https://pypi.org/project/lavalink/",
+        "praw": "https://pypi.org/project/praw/",
+        "aiosqlite": "praw",
+        "INST-Package-manager (optional)": "https://abdulh.xyz/apps"
+    },
+    "Message": "If you are using the INST Package manager the correct information is below",
+    "type": "pip",
+    "packages": [
+        "discord.py",
+        "lavalink",
+        "aiosqlite",
+        "praw"]
+}

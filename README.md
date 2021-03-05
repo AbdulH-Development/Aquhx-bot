@@ -1,9 +1,12 @@
 # **Aquhx-bot**
-<img align="right" src="img/logo.gif" height="75" width="75" border_radius="20px">
+<img align="right" src=".github/Aquhx.png" height="75" width="75" border_radius="100px">
 Welcome to Aquhx bot, an all in one discord moderation bot.<br><br>
 
+------
 
-## PREPARATIONS
+## PREPARATIONS<br>
+
+------
 
 You're gonna enjoy this bot but to get the full experience you must<br>
 do some preparations, depending on how many python versions you have<br>
@@ -11,7 +14,9 @@ you may need to do, ```python3 -m venv bot-env``` or just, ```python -m venv bot
 
 -----
 
-## DEPENDENCIES
+## DEPENDENCIES<br>
+
+------
 
 The modules you will need to install are:
 
@@ -22,26 +27,7 @@ lavalink,<br>
 praw,<br>
 colorama.<br>
 
------
-
-## HOW TO START
-
-<br>WINDOWS<br>
-To start the bot on windows you must have click on "Activate.exe" which will<br>
-run the python script in another window<br><br>
-
-OS X/Linux<br>
-To start the bot on the *nix operating systems you must run,<br>
-"source bot-env/bin/activate".<br>
-
-Now you need a .env file, what you're gonna wanna do is make a bot and get the bot token<br>
-in the .env you're gonna want to add "TOKEN = (bot_token_here)".<br>
-Then run ```python main.py```<br><br>
-
-And your good to go!<br><br>
-
 ------
-
 
 # **INFO**<br>
 
