@@ -8,7 +8,7 @@ from typing import List, Union
 from discord.ext import commands
 
 
-color = 0xff4500  # 0x4B0082
+color =  0xfffafa #0xff4500  # 0x4B0082
 
 
 load_dotenv()
@@ -40,13 +40,15 @@ class Fun(commands.Cog):
             await ctx.send(embed=em)
         elif words != None:
             try:
-                pool = await asyncpg.create_pool(user='postgres', password=PASSWD, database=DB, host=IP, max_inactive_connection_lifetime=1)
-                pg_con = await pool.acquire()
-                result = await pg_con.fetchrow(f"SELECT channel_id FROM aquhx.modlog WHERE guild_id = $1", ctx.guild.id)
+                result = await self.client.db.fetchrow(f"SELECT channel_id FROM aquhx.modlog WHERE guild_id = $1", ctx.guild.id)
                 if result == None:
                     await ctx.message.delete()
                     await asyncio.sleep(.5)
+                    if "@everyone" in words:
+                        return
                 elif result != None:
+                    if "@everyone" in words:
+                        return
                     channel = self.client.get_channel(int(result[0]))
                     await ctx.message.delete()
                     await asyncio.sleep(.5)
@@ -62,12 +64,11 @@ class Fun(commands.Cog):
                     await channel.send(embed=embed)
                 await ctx.send("{}".format(words))
             finally:
-                await pool.release(pg_con)
+                return
+
 
     @commands.command()
     async def embed(self, ctx, *, words=None):
-        t = time.localtime()
-        current_time = time.strftime("%I:%M %p", t)
         if words == None:
             em = discord.Embed(color=color)
             em.title = "Embed command"
@@ -80,38 +81,35 @@ class Fun(commands.Cog):
                           text=f"Requested by {ctx.author.name}")
             await ctx.send(embed=em)
         elif words != None:
-            try:
-                pool = await asyncpg.create_pool(user='postgres', password=PASSWD, database=DB, host=IP, max_inactive_connection_lifetime=1)
-                pg_con = await pool.acquire()
-                result = await pg_con.fetchrow(f"SELECT channel_id FROM aquhx.modlog WHERE guild_id = $1", ctx.guild.id)
-                if result == None:
+            if "@here" in words:
+                if ctx.author.advanced:
                     await ctx.message.delete()
                     await asyncio.sleep(.5)
                     em = discord.Embed(color=color)
                     em.set_author(icon_url=ctx.author.avatar_url,
                                   name=ctx.author.name)
                     em.description = "{}" .format(words)
-                elif result != None:
-                    channel = self.client.get_channel(int(result[0]))
+                    await ctx.send(embed=em)
+                else:
+                    return
+            elif "@everyone" in words:
+                if ctx.author.advanced:
                     await ctx.message.delete()
                     await asyncio.sleep(.5)
                     em = discord.Embed(color=color)
                     em.set_author(icon_url=ctx.author.avatar_url,
-                                  name=ctx.author.name)
+                          name=ctx.author.name)
                     em.description = "{}" .format(words)
-                    embed = discord.Embed(color=discord.Color.green())
-                    embed.title = "Said something"
-                    embed.set_footer(
-                        text=f'Ran by {ctx.author.name}', icon_url=ctx.author.avatar_url)
-                    embed.description = f"""
-                    Command operator: **{ctx.author.mention}**
-                    Time of unmute: **{current_time}**
-                    """
-                    embed.set_thumbnail(url=ctx.author.avatar_url)
-                    await channel.send(embed=embed)
-                await ctx.send(embed=em)
-            finally:
-                await pool.release(pg_con)
+                    await ctx.send(embed=em)
+                else:
+                    return
+            await ctx.message.delete()
+            await asyncio.sleep(.5)
+            em = discord.Embed(color=color)
+            em.set_author(icon_url=ctx.author.avatar_url,
+                          name=ctx.author.name)
+            em.description = "{}" .format(words)
+            await ctx.send(embed=em)
 
     @commands.command(aliases=['vote'])
     async def poll(self, ctx, *, words):
@@ -172,10 +170,6 @@ class Fun(commands.Cog):
                       value="Configure your logging channel")
         em2.add_field(name="deletelogs",
                       value="Delete your channel from the database")
-        em2.add_field(name="channelconfig",
-                      value="Set the welcome/goodbye channel")
-        em2.add_field(name="deletechannel",
-                      value="Delete the welcome/goodbye channel from the database")
         em2.set_footer(
             text=f"Requested by {ctx.author.name} at {current_time}", icon_url=ctx.author.avatar_url)
 

@@ -9,7 +9,7 @@ from discord.utils import get
 from discord.ext import commands
 
 
-color = 0xff4500  # 0x4B0082
+color = 0xfffafa #0xff4500  # 0x4B0082
 
 
 load_dotenv()
@@ -33,8 +33,9 @@ class administrator(commands.Cog):
             em = discord.Embed(color=color)
             em.title = "Ban command"
             em.description = """
+            INFO: [] = required, {} = optional
             Requires = Ban member
-            Arguments = [member] [reason(optional)]
+            Arguments = [member] {reason}
             Description = Bans a member
             """
             em.set_footer(icon_url=ctx.author.avatar_url,
@@ -87,8 +88,9 @@ class administrator(commands.Cog):
             em = discord.Embed(color=color)
             em.title = "Kick command"
             em.description = """
+            INFO: [] = required, {} = optional
             Requires = Kick member
-            Arguments = [member] [reason(optional)]
+            Arguments = [member] {reason}
             Description = Kicks a member
             """
             em.set_footer(icon_url=ctx.author.avatar_url,
@@ -141,6 +143,7 @@ class administrator(commands.Cog):
             em = discord.Embed(color=color)
             em.title = "Unban command"
             em.description = """
+            INFO: [] = required, {} = optional
             Requires = Ban member
             Arguments = [user]
             Description = Unbans a user
@@ -193,6 +196,7 @@ class administrator(commands.Cog):
             em = discord.Embed(color=color)
             em.title = "Clear command"
             em.description = """
+            INFO: [] = required, {} = optional
             Requires = Manage messages
             Arguments = [amount]
             Description = Clears messages
@@ -210,14 +214,12 @@ class administrator(commands.Cog):
                     em = discord.Embed(color=discord.Color.green())
                     em.description = f"✅ Purged **{amount+1}** message(s)"
                     await asyncio.sleep(3)
-                    await ctx.channel.purge(limit=1)
                 elif result != None:
                     channel = self.client.get_channel(int(result[0]))
                     await ctx.channel.purge(limit=amount + 1)
                     em = discord.Embed(color=discord.Color.green())
                     em.description = f"✅ Purged **{amount+1}** message(s)"
                     await asyncio.sleep(3)
-                    await ctx.channel.purge(limit=1)
                     embed = discord.Embed(color=discord.Color.green())
                     embed.title = "Messages purged"
                     embed.set_footer(
@@ -229,7 +231,9 @@ class administrator(commands.Cog):
                     """
                     embed.set_thumbnail(url=ctx.author.avatar_url)
                     await channel.send(embed=embed)
-                await ctx.send(embed=em)
+                sent = await ctx.send(embed=em)
+                await asyncio.sleep(3)
+                await sent.delete()
 
             finally:
                 await pool.release(pg_con)
@@ -243,6 +247,7 @@ class administrator(commands.Cog):
             em = discord.Embed(color=color)
             em.title = "Mute command"
             em.description = """
+            INFO: [] = required, {} = optional
             Requires = Manage messages
             Arguments = [member]
             Description = Mutes member
@@ -291,6 +296,7 @@ class administrator(commands.Cog):
             em = discord.Embed(color=color)
             em.title = "Unmute command"
             em.description = """
+            INFO: [] = required, {} = optional
             Requires = Manage messages
             Arguments = [member]
             Description = Unmutes member

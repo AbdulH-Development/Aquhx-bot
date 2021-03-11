@@ -1,7 +1,7 @@
 {
     "Creation date": "2021-03-03, 7:50 PM CST",
-    "Owner": "Abdul H",
-    "Collaboraters": "Mossyegghead01",
+    "Owner": "Abdul",
+    "Collaboraters": "Mossyegghead01, AFK_Pilot",
     "Version": "1.0.0",
     "Website": "https://abdulh.xyz/",
     "scripts": {
@@ -13,7 +13,7 @@
         "discord.py": "https://pypi.org/project/discord.py/",
         "lavalink": "https://pypi.org/project/lavalink/",
         "praw": "https://pypi.org/project/praw/",
-        "aiosqlite": "praw",
+        "asyncpg": "https://pypi.org/project/asyncpg/",
         "INST-Package-manager (optional)": "https://abdulh.xyz/apps"
     },
     "Message": "If you are using the INST Package manager the correct information is below",

@@ -12,3 +12,16 @@ CREATE TABLE IF NOT EXISTS aquhx.messages
     channel_id bigint NOT NULL,
     PRIMARY KEY (guild_id, channel_id)
 );
+
+CREATE TABLE IF NOT EXISTS aquhx.welcome
+(
+    guild_id bigint NOT NULL,
+    msg text NOT NULL,
+    PRIMARY KEY (guild_id, msg)
+);
+
+CREATE TABLE IF NOT EXISTS aquhx.goodbye (
+    guild_id bigint NOT NULL,
+    msg text NOT NULL,
+    PRIMARY KEY (guild_id, msg)
+);
