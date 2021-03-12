@@ -4,8 +4,7 @@
 
 One of the best discord bots out there
 
-[![Aquhx](https://github.com/Aquhx-Development/Aquhx-bot/actions/workflows/Aquhx.yml/badge.svg)](https://github.com/Aquhx-Development/Aquhx-bot/actions/workflows/Aquhx.yml)
-
+[![Aquhx-bot](https://github.com/Aquhx-Development/Aquhx-bot/actions/workflows/Aquhx.yml/badge.svg)](https://github.com/Aquhx-Development/Aquhx-bot/actions/workflows/Aquhx.yml)
 
 ## Should you use it?
 
