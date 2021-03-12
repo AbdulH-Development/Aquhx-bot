@@ -135,22 +135,6 @@ class Fun(commands.Cog):
     async def help(self, ctx):
         t = time.localtime()
         current_time = time.strftime("%I:%M %p", t)
-        emb = discord.Embed(color=color)
-        emb.set_author(icon_url=self.client.user.avatar_url,
-                       name="Aquhx help list")
-        emb.add_field(name="⚒️ Moderation commands",
-                      value="For mods+ only, these commands are very dangerous")
-        emb.add_field(name="⚙️ Configuration commands",
-                      value="For mods+ only, these commands configure the bot for your server")
-        emb.add_field(name="🌐 Regular commands",
-                      value="These commands are for regular folks, anyone can use these")
-        emb.set_footer(
-            text=f"Requested by {ctx.author.name} at {current_time}", icon_url=ctx.author.avatar_url)
-        msg = await ctx.send(embed=emb)
-        await msg.add_reaction('⚒️')
-        await msg.add_reaction('⚙️')
-        await msg.add_reaction('🌐')
-        await msg.add_reaction('🏠')
         em1 = discord.Embed(color=color)
         em1.set_author(icon_url=self.client.user.avatar_url,
                        name="Aquhx moderation list")
@@ -160,16 +144,8 @@ class Fun(commands.Cog):
         em1.add_field(name="Mute", value="Mute a member")
         em1.add_field(name="Unmute", value="Unmute a member")
         em1.add_field(name="Clear", value="Purge some messages")
+        em1.add_field(name="Setup", value="Setup some per server stuff")
         em1.set_footer(
-            text=f"Requested by {ctx.author.name} at {current_time}", icon_url=ctx.author.avatar_url)
-        em2 = discord.Embed(color=color)
-        em2.set_author(icon_url=self.client.user.avatar_url,
-                       name="Aquhx configuration list")
-        em2.add_field(name="configlogs",
-                      value="Configure your logging channel")
-        em2.add_field(name="deletelogs",
-                      value="Delete your channel from the database")
-        em2.set_footer(
             text=f"Requested by {ctx.author.name} at {current_time}", icon_url=ctx.author.avatar_url)
 
         em3 = discord.Embed(color=color)
@@ -180,9 +156,14 @@ class Fun(commands.Cog):
         em3.add_field(name="Poll", value="Vote on something")
         em3.set_footer(
             text=f"Requested by {ctx.author.name} at {current_time}", icon_url=ctx.author.avatar_url)
+        msg = await ctx.send(embed=em3)
+        await msg.add_reaction('◀️')
+        await msg.add_reaction('▶️')
+        await msg.add_reaction('🗑️')
+    
 
         def reac_check(r, u):
-            return u == ctx.author and msg.id == r.message.id and u != self.client.user and r.emoji in ['⚒️', '⚙️', '🌐', '🏠']
+            return u == ctx.author and msg.id == r.message.id and u != self.client.user and r.emoji in ['◀️', '▶️', '🗑️']
 
         loop = True
         while loop == True:
@@ -197,21 +178,15 @@ class Fun(commands.Cog):
             if user != self.client.user:
                 await msg.remove_reaction(emoji=em, member=user)
 
-            if em == '⚒️':
-                await msg.edit(embed=em1)
-                await msg.add_reaction('🏠')
-
-            if em == '⚙️':
-                await msg.edit(embed=em2)
-                await msg.add_reaction('🏠')
-
-            if em == '🌐':
+            if em == '◀️':
                 await msg.edit(embed=em3)
-                await msg.add_reaction('🏠')
 
-            if em == '🏠':
-                await msg.edit(embed=emb)
-                await msg.add_reaction('🏠')
+            if em == '▶️':
+                await msg.edit(embed=em1)
+
+            if em == "🗑️":
+                await msg.delete()
+
 
 
 def setup(client):
