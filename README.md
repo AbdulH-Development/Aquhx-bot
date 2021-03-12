@@ -1,8 +1,11 @@
-![](.github/Aquhx.png)
+<img align="right" src=".github/Aquhx.png">
 
 # Aquhx bot
 
 One of the best discord bots out there
+
+[![Aquhx](https://github.com/Aquhx-Development/Aquhx-bot/actions/workflows/Aquhx.yml/badge.svg)](https://github.com/Aquhx-Development/Aquhx-bot/actions/workflows/Aquhx.yml)
+
 
 ## Should you use it?
 
@@ -22,3 +25,14 @@ To install the packages either use the\
 requirements.txt file or\
 the [INST-Package-manager](https://abdulh.xyz/apps) using the
 [config.json](https://github.com/Aquhx-Development/Aquhx-bot/blob/main/lib/config/config.json)
+
+To run it just do
+
+```bash
+pip install -r requirements.txt
+```
+then
+```bash
+python main.py
+```
+
