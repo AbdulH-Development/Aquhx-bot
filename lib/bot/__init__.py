@@ -4,6 +4,7 @@ from discord.ext import commands
 from dotenv import load_dotenv
 from discord import Intents
 from discord import Embed
+import psycopg2
 import asyncio
 import asyncpg
 import math
@@ -18,22 +19,42 @@ PASSWD = os.getenv("PASSWD")
 load_dotenv()
 DB = os.getenv("DB")
 
-PREFIX = when_mentioned_or("$")
-OWNER_IDS = [541722893747224589]
+
 dbinfo = {
-    'max_inactive_connection_lifetime': 1,
     'user': 'postgres',
+    'host': IP,
     'password': PASSWD,
     'database': DB,
-    'host': IP
+    'max_inactive_connection_lifetime': 5
+}
+
+dbinfo2 = {
+    'user': 'postgres',
+    'host': IP,
+    'password': PASSWD,
+    'database': DB,
+    'port': 5432
 }
 
 
-class Bot(BotBase):
+PREFIX = when_mentioned_or("$")
+OWNER_IDS = [541722893747224589]
+
+
+def get_prefix(client, message):
+    conn = psycopg2.connect(**dbinfo2)
+    cursor = conn.cursor()
+    cursor.execute(
+        'SELECT prefix FROM aquhx.prefixes WHERE guild_id = %s', (message.guild.id, ))
+    prefix = cursor.fetchone()[0]
+    return when_mentioned_or(prefix)(client, message)
+
+
+class Client(BotBase):
     def __init__(self):
         self.PREFIX = PREFIX
         self.OWNER = OWNER_IDS
-        super().__init__(command_prefix=PREFIX, help_command=None,
+        super().__init__(command_prefix=get_prefix, help_command=None,
                          owners=OWNER_IDS, case_insensitive=True, perms=Intents.all())
 
     def run(self, version):
@@ -114,11 +135,28 @@ class Bot(BotBase):
             await ctx.send(embed=em)
             return
 
+    async def on_guild_join(self, guild):
+        await guild.create_role(name="Muted")
+        try:
+            pool = await asyncpg.create_pool(**dbinfo)
+            pg_con = await pool.acquire()
+            await pg_con.execute("INSERT INTO aquhx.prefixes(guild_id, prefix) VALUES($1, $2)", guild.id, "$")
+        finally:
+            await pool.release(pg_con)
+
+    async def on_guild_remove(self, guild):
+        try:
+            pool = await asyncpg.create_pool(**dbinfo)
+            pg_con = await pool.acquire()
+            await pg_con.execute("DELETE FROM aquhx.prefixes WHERE guild_id = $1", guild.id)
+        finally:
+            await pool.release(pg_con)
+
 
 f = open('lib/config/config.json', 'r')
 data = json.load(f)
 
-client = Bot()
+client = Client()
 VERSION = data['Version']
 
 
@@ -126,6 +164,4 @@ async def create_db_pool():
     pool = await asyncpg.create_pool(**dbinfo)
     client.db = await pool.acquire()
 
-
 asyncio.get_event_loop().run_until_complete(create_db_pool())
-

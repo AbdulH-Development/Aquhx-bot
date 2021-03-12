@@ -399,6 +399,36 @@ class config(Cog):
         finally:
             await pool.release(pg_con)
 
+    @commands.command()
+    @commands.has_permissions(manage_messages=True)
+    async def prefix(self, ctx, prefix: str = None):
+        if prefix == None:
+            em = discord.Embed(color=color)
+            em.title = "Prefix command"
+            em.description = """
+            INFO: [] = required, {} = optional
+            Requires = Manage messages
+            Arguments = [prefix]
+            Description = Changes the prefix
+            """
+            em.set_footer(icon_url=ctx.author.avatar_url,
+                          text=f"Requested by {ctx.author.name}")
+            await ctx.send(embed=em)
+        elif prefix != None:
+            try:
+                if len(prefix) > 3:
+                    await ctx.send("Can't have more than 3 letters")
+                res = await self.client.db.fetchrow("SELECT prefix FROM aquhx.prefixes WHERE guild_id = $1", ctx.guild.id)
+                if res != None:
+                    await self.client.db.execute("UPDATE aquhx.prefixes SET prefix = $1 WHERE guild_id = $2", prefix, ctx.guild.id)
+                    await ctx.send("Set")
+                elif res == None:
+                    await self.client.db.execute("INSERT INTO aquhx.prefixes(guild_id, prefix) VALUES($1, $2)", ctx.guild.id, "$")
+                    await self.client.db.execute("UPDATE aquhx.prefixes SET prefix = $1 WHERE guild_id = $2", prefix, ctx.guild.id)
+                    await ctx.send("Set")
+            except Exception as e:
+                await ctx.send("{}" .format(e))
+
 
 def setup(client):
     client.add_cog(config(client))

@@ -8,7 +8,7 @@ from typing import List, Union
 from discord.ext import commands
 
 
-color =  0xfffafa #0xff4500  # 0x4B0082
+color = 0xfffafa  # 0xff4500  # 0x4B0082
 
 
 load_dotenv()
@@ -66,7 +66,6 @@ class Fun(commands.Cog):
             finally:
                 return
 
-
     @commands.command()
     async def embed(self, ctx, *, words=None):
         if words == None:
@@ -98,7 +97,7 @@ class Fun(commands.Cog):
                     await asyncio.sleep(.5)
                     em = discord.Embed(color=color)
                     em.set_author(icon_url=ctx.author.avatar_url,
-                          name=ctx.author.name)
+                                  name=ctx.author.name)
                     em.description = "{}" .format(words)
                     await ctx.send(embed=em)
                 else:

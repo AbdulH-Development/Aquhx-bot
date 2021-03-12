@@ -9,7 +9,7 @@ from discord.utils import get
 from discord.ext import commands
 
 
-color = 0xfffafa #0xff4500  # 0x4B0082
+color = 0xfffafa  # 0xff4500  # 0x4B0082
 
 
 load_dotenv()
