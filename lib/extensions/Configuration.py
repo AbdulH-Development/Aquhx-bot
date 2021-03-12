@@ -77,7 +77,6 @@ class config(Cog):
                                     em = discord.Embed(color=color,
                                                        description="✅ Updated logs channel!")
                                     await sent.edit(embed=em)
-                                await ID.delete()
                             except Exception as e:
                                 await ctx.send("{}".format(e))
                     except asyncio.TimeoutError:
