@@ -186,6 +186,7 @@ class Fun(commands.Cog):
 
             if em == "🗑️":
                 await msg.delete()
+                await ctx.message.delete()
 
 
 
