@@ -1,4 +1,4 @@
-<img src=".github/Aquhx.png" style="width: 128px; border-radius: 50px; margin-left: 18.2cm;">
+<img src=".github/Aquhx.png" style="width: 128px; border-radius: 50px; margin-left: 18.2cm; height: 128px;">
 
 <h1 style="text-align: center; font-family: Arial, Helvetica, sans-serif;">Aquhx-bot</h1>
 
