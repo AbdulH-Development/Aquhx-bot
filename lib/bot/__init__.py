@@ -1,9 +1,10 @@
 from discord.ext.commands import Bot as BotBase
 from discord.ext.commands import when_mentioned_or
-from discord.ext import commands
-from discord.ext import commands
+from discord.ext.commands import command
 from dotenv import load_dotenv
 from discord import Intents
+from discord import Embed
+from discord.ext import commands
 from discord import Embed
 import psycopg2
 import asyncio
@@ -40,6 +41,7 @@ dbinfo2 = {
 
 PREFIX = when_mentioned_or("$")
 OWNER_IDS = [541722893747224589]
+color = 0xfffafa
 
 
 def get_prefix(client, message):
@@ -136,16 +138,6 @@ class Client(BotBase):
             await ctx.send(embed=em)
             return
 
-    async def on_error(self, ctx, error):
-        if hasattr(ctx.command, 'on_command_error'):
-            return
-
-        error = getattr(error, 'original', error)
-
-        if isinstance(error, KeyboardInterrupt):
-            print("Program interrupted by user")
-            return
-
     async def on_guild_join(self, guild):
         await guild.create_role(name="Muted")
         try:
@@ -169,6 +161,19 @@ data = json.load(f)
 client = Client()
 VERSION = data['Version']
 
+
+@client.command(aliases=["reload"], hidden=True)
+async def _reload(ctx):
+    if ctx.author.id in OWNER_IDS:
+        try:
+            for filename in os.listdir("./lib/extensions"):
+                if filename.endswith(".py"):
+                    client.reload_extension(f"lib.extensions.{filename[:-3]}")
+            em = Embed(color=color)
+            em.description = f"✅ Reloaded extensions"
+            await ctx.send(embed=em)
+        except Exception as e:
+            await ctx.send("{}" .format(e))
 
 
 async def create_db_pool():

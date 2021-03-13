@@ -2,7 +2,7 @@
     "Creation date": "2021-03-03, 7:50 PM CST",
     "Owner": "Abdul",
     "Collaboraters": "Mossyegghead01, AFK_Pilot",
-    "Version": "1.1.1",
+    "Version": "1.1.2",
     "Website": "https://abdulh.xyz/",
     "scripts": {
         "start": "python main.py"
@@ -12,7 +12,7 @@
     "Dependancies": {
         "discord.py": "https://pypi.org/project/discord.py/",
         "lavalink": "https://pypi.org/project/lavalink/",
-        "praw": "https://pypi.org/project/praw/",
+        "asyncpraw": "https://pypi.org/project/asyncpraw/",
         "asyncpg": "https://pypi.org/project/asyncpg/",
         "INST-Package-manager (optional)": "https://abdulh.xyz/apps"
     },

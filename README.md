@@ -10,8 +10,8 @@ One of the best discord bots out there
 
 That\'s up to you but\
 the bot has many great capabilities like:\
-logging, moderation and to be implemented:\
-memes, music, auto-moderation and\
+logging, moderation, memes and to be implemented:\
+music, auto-moderation and\
 maybe a dashboard
 
 ## Technichal information

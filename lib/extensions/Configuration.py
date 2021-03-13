@@ -278,7 +278,7 @@ class config(Cog):
                                     name="Aquhx msgs wizard")
                                 logs.description = "Would you like to continue without a welcome message set?. Y, N"
                                 logs.set_footer(text="Aquhx msgs wizard",
-                                                 icon_url=self.client.user.avatar_url)
+                                                icon_url=self.client.user.avatar_url)
                                 await sent.edit(embed=logs)
                                 try:
                                     answer = await self.client.wait_for(
@@ -289,149 +289,145 @@ class config(Cog):
                                         try:
                                             await answer.delete()
                                             if answer.content == "Y" or 'y':
-                                                        logs = discord.Embed(
-                                                            color=color)
-                                                        logs.set_author(
-                                                            name="Aquhx msgs wizard")
-                                                        logs.description = "Next I require a goodbye message."
-                                                        logs.set_footer(text="Aquhx msgs wizard",
+                                                logs = discord.Embed(
+                                                    color=color)
+                                                logs.set_author(
+                                                    name="Aquhx msgs wizard")
+                                                logs.description = "Next I require a goodbye message."
+                                                logs.set_footer(text="Aquhx msgs wizard",
                                                                 icon_url=self.client.user.avatar_url)
+                                                await sent.edit(embed=logs)
+                                                try:
+                                                    good = await self.client.wait_for(
+                                                        'message',
+                                                        timeout=60.0,
+                                                        check=lambda message: message.author == ctx.author and message.channel == ctx.channel)
+                                                    try:
+                                                        msgs = good.content
+                                                        res = await pg_con.fetchrow("SELECT msg FROM aquhx.goodbye WHERE guild_id = $1", ctx.guild.id)
+                                                        if res == None:
+                                                            await pg_con.execute("INSERT INTO aquhx.goodbye(guild_id, msg) VALUES($1, $2)", ctx.guild.id, msgs)
+                                                            logs = discord.Embed(
+                                                                color=color)
+                                                            logs.set_author(
+                                                                name="Aquhx msgs wizard")
+                                                            logs.description = "✅ Set goodbye message."
+                                                            logs.set_footer(text="Aquhx msgs wizard",
+                                                                            icon_url=self.client.user.avatar_url)
+                                                        elif res != None:
+                                                            await pg_con.execute("UPDATE aquhx.goodbye SET msg = $1 WHERE guild_id = $2",   msgs, ctx.guild.id)
+                                                            logs = discord.Embed(
+                                                                color=color)
+                                                            logs.set_author(
+                                                                name="Aquhx msgs wizard")
+                                                            logs.description = "✅ Updated goodbye message."
+                                                            logs.set_footer(text="Aquhx msgs wizard",
+                                                                            icon_url=self.client.user.avatar_url)
                                                         await sent.edit(embed=logs)
+                                                        await good.delete()
+                                                        await asyncio.sleep(3)
+                                                        em = discord.Embed(
+                                                            color=color)
+                                                        em.set_author(
+                                                            name="Aquhx msgs wizard")
+                                                        em.description = "✅ Completed all tasks, thank you for using Aquhx"
+                                                        em.set_footer(
+                                                            text="Aquhx msgs wizard", icon_url=self.client.user.avatar_url)
+                                                        await sent.edit(embed=em)
+                                                    except Exception as e:
+                                                        await ctx.send("{}".format(e))
+                                                except asyncio.TimeoutError:
+                                                    await ctx.send("You took too long!")
+
+                                            elif answer.content == "N" or 'n':
+                                                await asyncio.sleep(3)
+                                                logs = discord.Embed(
+                                                    color=color)
+                                                logs.set_author(
+                                                    name="Aquhx msgs wizard")
+                                                logs.description = "Next I require a welcome message."
+                                                logs.set_footer(text="Aquhx msgs wizard",
+                                                                icon_url=self.client.user.avatar_url)
+                                                await sent.edit(embed=logs)
+                                                try:
+                                                    good = await self.client.wait_for(
+                                                        'message',
+                                                        timeout=60.0,
+                                                        check=lambda message: message.author == ctx.author and message.channel == ctx.channel)
+                                                    if good:
                                                         try:
-                                                            good = await self.client.wait_for(
-                                                                'message',
-                                                                timeout=60.0,
-                                                                check=lambda message: message.author == ctx.author and message.channel == ctx.channel)
+                                                            msgs = good.content
+                                                            res = await pg_con.fetchrow("SELECT msg FROM aquhx.welcome WHERE guild_id = $1", ctx.guild.id)
+                                                            if res == None:
+                                                                await pg_con.execute("INSERT INTO aquhx.welcome(guild_id, msg) VALUES($1, $2)", ctx.guild.id, msgs)
+                                                            elif res != None:
+                                                                await pg_con.execute("UPDATE aquhx.welcome SET msg = $1 WHERE guild_id = $2",   msgs, ctx.guild.id)
+                                                                logs = discord.Embed(
+                                                                    color=color)
+                                                                logs.set_author(
+                                                                    name="Aquhx msgs wizard")
+                                                                logs.description = "✅ Updated welcome message."
+                                                                logs.set_footer(text="Aquhx msgs wizard",
+                                                                                icon_url=self.client.user.avatar_url)
+                                                            await sent.edit(embed=logs)
+                                                            await good.delete()
+                                                            await asyncio.sleep(3)
+                                                            logs = discord.Embed(
+                                                                color=color)
+                                                            logs.set_author(
+                                                                name="Aquhx msgs wizard")
+                                                            logs.description = "Next I require a welcome message."
+                                                            logs.set_footer(text="Aquhx msgs wizard",
+                                                                            icon_url=self.client.user.avatar_url)
+                                                            await sent.edit(embed=logs)
                                                             try:
-                                                                msgs = good.content
+                                                                await good.delete()
+                                                                good = await self.client.wait_for(
+                                                                    'message',
+                                                                    timeout=60.0,
+                                                                    check=lambda message: message.author == ctx.author and message.channel == ctx.channel)
                                                                 res = await pg_con.fetchrow("SELECT msg FROM aquhx.goodbye WHERE guild_id = $1", ctx.guild.id)
                                                                 if res == None:
                                                                     await pg_con.execute("INSERT INTO aquhx.goodbye(guild_id, msg) VALUES($1, $2)", ctx.guild.id, msgs)
                                                                     logs = discord.Embed(
-                                                                    color=color)
+                                                                        color=color)
                                                                     logs.set_author(
-                                                                    name="Aquhx msgs wizard")
+                                                                        name="Aquhx msgs wizard")
                                                                     logs.description = "✅ Set goodbye message."
                                                                     logs.set_footer(text="Aquhx msgs wizard",
-                                                                            icon_url=self.client.user.avatar_url)
+                                                                                    icon_url=self.client.user.avatar_url)
+                                                                    await sent.edit(embed=logs)
                                                                 elif res != None:
-                                                                    await pg_con.execute("UPDATE aquhx.goodbye SET msg = $1 WHERE guild_id = $2",   msgs, ctx.guild.id)
-                                                                    logs = discord.Embed(
-                                                                    color=color)
-                                                                    logs.set_author(
-                                                                    name="Aquhx msgs wizard")
-                                                                    logs.description = "✅ Updated goodbye message."
-                                                                    logs.set_footer(text="Aquhx msgs wizard",
-                                                                            icon_url=self.client.user.avatar_url)
-                                                                await sent.edit(embed=logs)
-                                                                await good.delete()
-                                                                await asyncio.sleep(3)
-                                                                em = discord.Embed(
-                                                                color=color)
-                                                                em.set_author(
-                                                                name="Aquhx msgs wizard")
-                                                                em.description = "✅ Completed all tasks, thank you for using Aquhx"
-                                                                em.set_footer(
-                                                                text="Aquhx msgs wizard", icon_url=self.client.user.avatar_url)
-                                                                await sent.edit(embed=em)
-                                                            except Exception as e:
-                                                                await ctx.send("{}".format(e))
-                                                        except asyncio.TimeoutError:
-                                                            await ctx.send("You took too long!")
-
-                                            elif answer.content == "N" or 'n':
-                                                    await asyncio.sleep(3)
-                                                    logs = discord.Embed(
-                                                            color=color)
-                                                    logs.set_author(
-                                                            name="Aquhx msgs wizard")
-                                                    logs.description = "Next I require a welcome message."
-                                                    logs.set_footer(text="Aquhx msgs wizard",
-                                                                        icon_url=self.client.user.avatar_url)
-                                                    await sent.edit(embed=logs)
-                                                    try:
-                                                        good = await self.client.wait_for(
-                                                            'message',
-                                                            timeout=60.0,
-                                                            check=lambda message: message.author == ctx.author and message.channel == ctx.channel)
-                                                        if good:
-                                                            try:
-                                                                msgs = good.content
-                                                                res = await pg_con.fetchrow("SELECT msg FROM aquhx.welcome WHERE guild_id = $1", ctx.guild.id)
-                                                                if res == None:
-                                                                    await pg_con.execute("INSERT INTO aquhx.welcome(guild_id, msg) VALUES($1, $2)", ctx.guild.id, msgs)
-                                                                elif res != None:
-                                                                    await pg_con.execute("UPDATE aquhx.welcome SET msg = $1 WHERE guild_id = $2",   msgs, ctx.guild.id)
+                                                                    await pg_con.execute("UPDATE aquhx.goodbye SET msg = $1 WHERE guild_id = $2", msgs, ctx.guild.id)
                                                                     logs = discord.Embed(
                                                                         color=color)
                                                                     logs.set_author(
                                                                         name="Aquhx msgs wizard")
-                                                                    logs.description = "✅ Updated welcome message."
+                                                                    logs.description = "✅ Updated goodbye message."
                                                                     logs.set_footer(text="Aquhx msgs wizard",
                                                                                     icon_url=self.client.user.avatar_url)
-                                                                await sent.edit(embed=logs)
-                                                                await good.delete()
-                                                                await asyncio.sleep(3)
-                                                                logs = discord.Embed(
+                                                                    await sent.edit(embed=logs)
+                                                                    await asyncio.sleep(3)
+                                                                    em = discord.Embed(
                                                                         color=color)
-                                                                logs.set_author(
-                                                                    name="Aquhx msgs wizard")
-                                                                logs.description = "Next I require a welcome message."
-                                                                logs.set_footer(text="Aquhx msgs wizard",
-                                                                        icon_url=self.client.user.avatar_url)
-                                                                await sent.edit(embed=logs)
-                                                                try:
-                                                                    await good.delete()
-                                                                    good = await self.client.wait_for(
-                                                                        'message',
-                                                                        timeout=60.0,
-                                                                        check=lambda message: message.author == ctx.author and message.channel == ctx.channel)
-                                                                    res = await pg_con.fetchrow("SELECT msg FROM aquhx.goodbye WHERE guild_id = $1", ctx.guild.id)
-                                                                    if res == None:
-                                                                        await pg_con.execute("INSERT INTO aquhx.goodbye(guild_id, msg) VALUES($1, $2)", ctx.guild.id, msgs)
-                                                                        logs = discord.Embed(
-                                                                                color=color)
-                                                                        logs.set_author(
-                                                                                name="Aquhx msgs wizard")
-                                                                        logs.description = "✅ Set goodbye message."
-                                                                        logs.set_footer(text="Aquhx msgs wizard",
-                                                                                            icon_url=self.client.user.avatar_url)
-                                                                        await sent.edit(embed=logs)
-                                                                    elif res != None:
-                                                                        await pg_con.execute("UPDATE aquhx.goodbye SET msg = $1 WHERE guild_id = $2", msgs, ctx.guild.id)
-                                                                        logs = discord.Embed(
-                                                                                color=color)
-                                                                        logs.set_author(
-                                                                                name="Aquhx msgs wizard")
-                                                                        logs.description = "✅ Updated goodbye message."
-                                                                        logs.set_footer(text="Aquhx msgs wizard",
-                                                                                            icon_url=self.client.user.avatar_url)
-                                                                        await sent.edit(embed=logs)
-                                                                        await asyncio.sleep(3)
-                                                                        em = discord.Embed(
-                                                                            color=color)
-                                                                        em.set_author(
-                                                                            name="Aquhx msgs wizard")
-                                                                        em.description = "✅ Completed all tasks, thank you for using Aquhx"
-                                                                        em.set_footer(
-                                                                            text="Aquhx msgs wizard", icon_url=self.client.user.avatar_url)
-                                                                    await sent.edit(embed=em)
-                                                                except asyncio.TimeoutError:
-                                                                    await ctx.send("You didn't respond in time")
-                                                            except Exception as e:
-                                                                await ctx.send("{}".format(e))
-                                                    except Exception as e:
-                                                        await ctx.send("{}".format(e))
+                                                                    em.set_author(
+                                                                        name="Aquhx msgs wizard")
+                                                                    em.description = "✅ Completed all tasks, thank you for using Aquhx"
+                                                                    em.set_footer(
+                                                                        text="Aquhx msgs wizard", icon_url=self.client.user.avatar_url)
+                                                                await sent.edit(embed=em)
+                                                            except asyncio.TimeoutError:
+                                                                await ctx.send("You didn't respond in time")
+                                                        except Exception as e:
+                                                            await ctx.send("{}".format(e))
+                                                except Exception as e:
+                                                    await ctx.send("{}".format(e))
                                         except Exception as e:
                                             await ctx.send("{}" .format(e))
                                 except asyncio.TimeoutError:
                                     await ctx.send("You took too long!")
                     except asyncio.TimeoutError:
                         await ctx.send("You took too long!")
-
-
-                        
-                                        
 
                 elif msg.content == "dellogs":
                     try:
