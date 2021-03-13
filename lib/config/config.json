@@ -2,7 +2,7 @@
     "Creation date": "2021-03-03, 7:50 PM CST",
     "Owner": "Abdul",
     "Collaboraters": "Mossyegghead01, AFK_Pilot",
-    "Version": "1.0.0",
+    "Version": "1.1.1",
     "Website": "https://abdulh.xyz/",
     "scripts": {
         "start": "python main.py"

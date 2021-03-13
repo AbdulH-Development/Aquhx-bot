@@ -1,6 +1,7 @@
 from discord.ext.commands import Bot as BotBase
 from discord.ext.commands import when_mentioned_or
 from discord.ext import commands
+from discord.ext import commands
 from dotenv import load_dotenv
 from discord import Intents
 from discord import Embed
@@ -135,6 +136,16 @@ class Client(BotBase):
             await ctx.send(embed=em)
             return
 
+    async def on_error(self, ctx, error):
+        if hasattr(ctx.command, 'on_command_error'):
+            return
+
+        error = getattr(error, 'original', error)
+
+        if isinstance(error, KeyboardInterrupt):
+            print("Program interrupted by user")
+            return
+
     async def on_guild_join(self, guild):
         await guild.create_role(name="Muted")
         try:
@@ -155,13 +166,14 @@ class Client(BotBase):
 
 f = open('lib/config/config.json', 'r')
 data = json.load(f)
-
 client = Client()
 VERSION = data['Version']
+
 
 
 async def create_db_pool():
     pool = await asyncpg.create_pool(**dbinfo)
     client.db = await pool.acquire()
+
 
 asyncio.get_event_loop().run_until_complete(create_db_pool())

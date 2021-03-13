@@ -12,6 +12,8 @@ from discord.ext import commands
 color = 0xfffafa  # 0xff4500  # 0x4B0082
 
 
+OWNER_IDS = [541722893747224589]
+
 load_dotenv()
 IP = os.getenv("IP")
 load_dotenv()
