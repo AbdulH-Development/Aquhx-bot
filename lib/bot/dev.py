@@ -11,6 +11,7 @@ import psycopg2
 import asyncio
 import asyncpg
 import math
+import time
 import json
 import os
 
@@ -40,35 +41,22 @@ dbinfo2 = {
 }
 
 
-PREFIX = when_mentioned_or("$")
+PREFIX = when_mentioned_or(".")
 OWNER_IDS = [541722893747224589]
 color = 0xfffafa
 
-
-async def create_db_pool():
-    pool = await asyncpg.create_pool(**dbinfo)
-    client.db = await pool.acquire()
-
-
-def get_prefix(client, message):
-    conn = psycopg2.connect(**dbinfo2)
-    cursor = conn.cursor()
-    cursor.execute(
-        'SELECT prefix FROM aquhx.prefixes WHERE guild_id = %s', (message.guild.id, ))
-    prefix = cursor.fetchone()[0]
-    return when_mentioned_or(prefix)(client, message)
 
 
 class Client(BotBase):
     def __init__(self):
         self.PREFIX = PREFIX
         self.OWNER = OWNER_IDS
-        super().__init__(command_prefix=get_prefix, help_command=None,
+        super().__init__(command_prefix=PREFIX, help_command=None,
                          owners=OWNER_IDS, case_insensitive=True, perms=Intents.all())
 
     def run(self, version):
         load_dotenv()
-        self.TOKEN = os.getenv("AQUHX")
+        self.TOKEN = os.getenv("BETA")
         self.VERSION = version
         super().run(self.TOKEN, reconnect=True)
 
@@ -84,7 +72,6 @@ class Client(BotBase):
             if filename.endswith('.py'):
                 self.load_extension(f'lib.extensions.{filename[:-3]}')
                 print(f'[INFO] Loaded lib/extensions/{filename[:-3]}.py')
-
         try:
             pool = await asyncpg.create_pool(**dbinfo)
             pg_con = await pool.acquire()
@@ -162,6 +149,78 @@ class Client(BotBase):
             await pool.release(pg_con)
 
 
+    async def on_message_edit(self, before, after):
+        if before.author == self.user:
+            return
+        for guild in self.guilds:
+            pool = await asyncpg.create_pool(**dbinfo)
+            pg_con = await pool.acquire()
+            result = await pg_con.fetchrow("SELECT channel_id FROM aquhx.modlog WHERE guild_id = $1", guild.id)
+            if result == None:
+                break
+            elif result != None:
+                try:
+                    channel = self.get_channel(int(result[0]))
+                    em = Embed(color=color)
+                    em.set_author(name=f"{after.author.name} triggered an event", icon_url=self.user.avatar_url)
+                    em.description = f"""
+                    {before.author.mention} edited their message
+                    in {before.channel.mention}.
+
+                    Old
+                    ```{before.content}```
+
+                    New 
+                    ```{after.content}```
+                    """
+                    em.set_thumbnail(url=self.user.avatar_url)
+                    await channel.send(embed=em)
+                except Exception as e:
+                    print(e)
+
+
+
+    async def on_message_delete(self, message):
+        pool = await asyncpg.create_pool(**dbinfo)
+        pg_con = await pool.acquire()
+        if message.author == self.user:
+            return
+        result = await pg_con.fetchrow('SELECT channel_id FROM aquhx.modlog WHERE guild_id = $1', message.guild.id)
+        if result == None:
+            return
+        elif result != None:
+            try:
+                channel = self.get_channel(int(result[0]))
+                em = Embed(color=color)
+                em.description = f"""
+                {message.author.mention} deleted a message
+                in {message.channel.mention}
+
+                Content
+                ```{message.content}```
+                """
+                em.set_thumbnail(url=self.user.avatar_url)
+                em.set_footer(text=f"")
+                await channel.send(embed=em)
+            except Exception as e:
+                print(e)
+        
+
+    async def on_member_join(self, member):
+        result = await self.client.db.fetchrow("SELECT channel_id FROM aquhx.messages WHERE guild_id = $1", member.guild.id)
+        if result == None:
+            return
+        elif result != None:
+            try:
+                mention = member.mention
+                members = len(list(member.guild.members))
+                user = member.name
+                channel = self.get_channel(int(result[0]))
+                welcome = self.client.db.fetchrow("SELECT welcome FROM aquhx.welcome WHERE guild_id = $1", member.guild.id)
+                await channel.send(str(welcome[0]) .format(members=members, mention=mention, user=user))
+            except Exception as e:
+                print(e)
+            
 
 f = open('lib/config/config.json', 'r')
 data = json.load(f)
@@ -190,21 +249,36 @@ class Developer(commands.Cog):
         elif ctx.author.id not in OWNER_IDS:
             em = Embed(color=color)
             em.description = "❌ You don't have permission to run this."
+            await ctx.send(embed=em)
 
-    @command(aliases=['_restart'])
-    async def restart(self, ctx):
+    @command(aliases=['restart'])
+    async def _restart(self, ctx):
+        em = Embed(color=color)
+        em.description = "✅ Restarted bot"
+        await ctx.send(embed=em)
         if ctx.author.id in OWNER_IDS:
+            await self.client.logout()
             await self.client.close()
             if platform.system() == "Windows":
                 os.system('python.exe lib/Scripts/dev-restart.py')
+                os.system('cls')
             elif platform.system() == "Linux":
                 os.system('python3 lib/Scripts/dev-restart.py')
+                os.system('clear')
             elif platform.system() == "Darwin":
                 os.system('python3 lib/Scripts/dev-restart.py')
+                os.system('clear')
         elif ctx.author.id not in OWNER_IDS:
-            pass
-
+            em = Embed(color=color)
+            em.description = "❌ You don't have permission to run this."
+            await ctx.send(embed=em)
 
 client.add_cog(Developer(client))
+
+
+async def create_db_pool():
+    pool = await asyncpg.create_pool(**dbinfo)
+    client.db = await pool.acquire()
+
 
 asyncio.get_event_loop().run_until_complete(create_db_pool())

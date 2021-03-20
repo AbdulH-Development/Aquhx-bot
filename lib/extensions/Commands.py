@@ -127,19 +127,7 @@ class Fun(commands.Cog):
                 elif result != None:
                     if "@everyone" in words:
                         return
-                    channel = self.client.get_channel(int(result[0]))
                     await ctx.message.delete()
-                    await asyncio.sleep(.5)
-                    embed = discord.Embed(color=discord.Color.green())
-                    embed.title = "Said something"
-                    embed.set_footer(
-                        text=f'Ran by {ctx.author.name}', icon_url=ctx.author.avatar_url)
-                    embed.description = f"""
-                    Command operator: **{ctx.author.mention}**
-                    Time of unmute: **{current_time}**
-                    """
-                    embed.set_thumbnail(url=ctx.author.avatar_url)
-                    await channel.send(embed=embed)
                 await ctx.send("{}".format(words))
             finally:
                 return

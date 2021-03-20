@@ -42,8 +42,6 @@ class config(Cog):
         sent = await ctx.send(embed=em)
 
         try:
-            pool = await asyncpg.create_pool(user='postgres', password=PASSWD, database=DB, host=IP, max_inactive_connection_lifetime=5)
-            pg_con = await pool.acquire()
             msg = await self.client.wait_for(
                 'message',
                 timeout=60.0,
@@ -66,14 +64,14 @@ class config(Cog):
                             try:
                                 log = ID.content
                                 await ID.delete()
-                                res = await pg_con.fetchrow("SELECT channel_id FROM aquhx.modlog WHERE guild_id = $1", ctx.guild.id)
+                                res = await self.client.db.fetchrow("SELECT channel_id FROM aquhx.modlog WHERE guild_id = $1", ctx.guild.id)
                                 if res == None:
-                                    await pg_con.execute("INSERT INTO aquhx.modlog(guild_id, channel_id) VALUES($1, $2)", ctx.guild.id, int(log))
+                                    await self.client.db.execute("INSERT INTO aquhx.modlog(guild_id, channel_id) VALUES($1, $2)", ctx.guild.id, int(log))
                                     em = discord.Embed(color=color,
                                                        description="✅ Set logs channel!")
                                     await sent.edit(embed=em)
                                 elif res != None:
-                                    await pg_con.execute("UPDATE aquhx.modlog SET channel_id = $1 WHERE guild_id = $2", int(log), ctx.guild.id)
+                                    await self.client.db.execute("UPDATE aquhx.modlog SET channel_id = $1 WHERE guild_id = $2", int(log), ctx.guild.id)
                                     em = discord.Embed(color=color,
                                                        description="✅ Updated logs channel!")
                                     await sent.edit(embed=em)
@@ -98,16 +96,16 @@ class config(Cog):
                         if ID:
                             n = ID.content
                             await ID.delete()
-                            res = await pg_con.fetchrow("SELECT channel_id FROM aquhx.messages WHERE guild_id = $1", ctx.guild.id)
+                            res = await self.client.db.fetchrow("SELECT channel_id FROM aquhx.messages WHERE guild_id = $1", ctx.guild.id)
                             if res == None:
-                                await pg_con.execute("INSERT INTO aquhx.messages(guild_id, channel_id) VALUES($1, $2)", ctx.guild.id, int(n))
+                                await self.client.db.execute("INSERT INTO aquhx.messages(guild_id, channel_id) VALUES($1, $2)", ctx.guild.id, int(n))
                                 em = discord.Embed(color=color)
                                 em.set_author(name="Aquhx msgs wizard")
                                 em.description = "✅ Set the message channel"
                                 em.set_footer(
                                     text="Aquhx msgs wizard", icon_url=self.client.user.avatar_url)
                             elif res != None:
-                                await pg_con.execute("UPDATE aquhx.messages SET channel_id = $1 WHERE guild_id = $2", int(n), ctx.guild.id)
+                                await self.client.db.execute("UPDATE aquhx.messages SET channel_id = $1 WHERE guild_id = $2", int(n), ctx.guild.id)
                                 em = discord.Embed(color=color)
                                 em.set_author(name="Aquhx msgs wizard")
                                 em.description = "✅ Set the message channel"
@@ -130,9 +128,9 @@ class config(Cog):
                                     try:
                                         await wel.delete()
                                         msgs = wel.content
-                                        res = await pg_con.fetchrow("SELECT msg FROM aquhx.welcome WHERE guild_id = $1", ctx.guild.id)
+                                        res = await self.client.db.fetchrow("SELECT msg FROM aquhx.welcome WHERE guild_id = $1", ctx.guild.id)
                                         if res == None:
-                                            await pg_con.execute("INSERT INTO aquhx.welcome(guild_id, msg) VALUES($1, $2)", ctx.guild.id, msgs)
+                                            await self.client.db.execute("INSERT INTO aquhx.welcome(guild_id, msg) VALUES($1, $2)", ctx.guild.id, msgs)
                                             logs = discord.Embed(color=color)
                                             logs.set_author(
                                                 name="Aquhx msgs wizard")
@@ -141,7 +139,7 @@ class config(Cog):
                                                             icon_url=self.client.user.avatar_url)
                                             await sent.edit(embed=logs)
                                         elif res != None:
-                                            await pg_con.execute("UPDATE aquhx.welcome SET msg = $1 WHERE guild_id = $2", msgs, ctx.guild.id)
+                                            await self.client.db.execute("UPDATE aquhx.welcome SET msg = $1 WHERE guild_id = $2", msgs, ctx.guild.id)
                                             logs = discord.Embed(color=color)
                                             logs.set_author(
                                                 name="Aquhx msgs wizard")
@@ -166,9 +164,9 @@ class config(Cog):
                                                 try:
                                                     msgs = good.content
                                                     await good.delete()
-                                                    res = await pg_con.fetchrow("SELECT msg FROM aquhx.goodbye WHERE guild_id = $1", ctx.guild.id)
+                                                    res = await self.client.db.fetchrow("SELECT msg FROM aquhx.goodbye WHERE guild_id = $1", ctx.guild.id)
                                                     if res == None:
-                                                        await pg_con.execute("INSERT INTO aquhx.goodbye(guild_id, msg) VALUES($1, $2)", ctx.guild.id, msgs)
+                                                        await self.client.db.execute("INSERT INTO aquhx.goodbye(guild_id, msg) VALUES($1, $2)", ctx.guild.id, msgs)
                                                         logs = discord.Embed(
                                                             color=color)
                                                         logs.set_author(
@@ -178,7 +176,7 @@ class config(Cog):
                                                                         icon_url=self.client.user.avatar_url)
                                                         await sent.edit(embed=logs)
                                                     elif res != None:
-                                                        await pg_con.execute("UPDATE aquhx.goodbye SET msg = $1 WHERE guild_id = $2", msgs, ctx.guild.id)
+                                                        await self.client.db.execute("UPDATE aquhx.goodbye SET msg = $1 WHERE guild_id = $2", msgs, ctx.guild.id)
                                                         logs = discord.Embed(
                                                             color=color)
                                                         logs.set_author(
@@ -232,9 +230,9 @@ class config(Cog):
                                                                 if good:
                                                                     try:
                                                                         await good.delete()
-                                                                        res = await pg_con.fetchrow("SELECT msg FROM aquhx.goodbye WHERE guild_id = $1", ctx.guild.id)
+                                                                        res = await self.client.db.fetchrow("SELECT msg FROM aquhx.goodbye WHERE guild_id = $1", ctx.guild.id)
                                                                         if res == None:
-                                                                            await pg_con.execute("INSERT INTO aquhx.goodbye(guild_id, msg) VALUES($1, $2)", ctx.guild.id, msgs)
+                                                                            await self.client.db.execute("INSERT INTO aquhx.goodbye(guild_id, msg) VALUES($1, $2)", ctx.guild.id, msgs)
                                                                             logs = discord.Embed(
                                                                                 color=color)
                                                                             logs.set_author(
@@ -244,7 +242,7 @@ class config(Cog):
                                                                                             icon_url=self.client.user.avatar_url)
                                                                             await sent.edit(embed=logs)
                                                                         elif res != None:
-                                                                            await pg_con.execute("UPDATE aquhx.goodbye SET msg = $1 WHERE guild_id = $2", msgs, ctx.guild.id)
+                                                                            await self.client.db.execute("UPDATE aquhx.goodbye SET msg = $1 WHERE guild_id = $2", msgs, ctx.guild.id)
                                                                             logs = discord.Embed(
                                                                                 color=color)
                                                                             logs.set_author(
@@ -304,9 +302,9 @@ class config(Cog):
                                                         check=lambda message: message.author == ctx.author and message.channel == ctx.channel)
                                                     try:
                                                         msgs = good.content
-                                                        res = await pg_con.fetchrow("SELECT msg FROM aquhx.goodbye WHERE guild_id = $1", ctx.guild.id)
+                                                        res = await self.client.db.fetchrow("SELECT msg FROM aquhx.goodbye WHERE guild_id = $1", ctx.guild.id)
                                                         if res == None:
-                                                            await pg_con.execute("INSERT INTO aquhx.goodbye(guild_id, msg) VALUES($1, $2)", ctx.guild.id, msgs)
+                                                            await self.client.db.execute("INSERT INTO aquhx.goodbye(guild_id, msg) VALUES($1, $2)", ctx.guild.id, msgs)
                                                             logs = discord.Embed(
                                                                 color=color)
                                                             logs.set_author(
@@ -315,7 +313,7 @@ class config(Cog):
                                                             logs.set_footer(text="Aquhx msgs wizard",
                                                                             icon_url=self.client.user.avatar_url)
                                                         elif res != None:
-                                                            await pg_con.execute("UPDATE aquhx.goodbye SET msg = $1 WHERE guild_id = $2",   msgs, ctx.guild.id)
+                                                            await self.client.db.execute("UPDATE aquhx.goodbye SET msg = $1 WHERE guild_id = $2",   msgs, ctx.guild.id)
                                                             logs = discord.Embed(
                                                                 color=color)
                                                             logs.set_author(
@@ -357,11 +355,11 @@ class config(Cog):
                                                     if good:
                                                         try:
                                                             msgs = good.content
-                                                            res = await pg_con.fetchrow("SELECT msg FROM aquhx.welcome WHERE guild_id = $1", ctx.guild.id)
+                                                            res = await self.client.db.fetchrow("SELECT msg FROM aquhx.welcome WHERE guild_id = $1", ctx.guild.id)
                                                             if res == None:
-                                                                await pg_con.execute("INSERT INTO aquhx.welcome(guild_id, msg) VALUES($1, $2)", ctx.guild.id, msgs)
+                                                                await self.client.db.execute("INSERT INTO aquhx.welcome(guild_id, msg) VALUES($1, $2)", ctx.guild.id, msgs)
                                                             elif res != None:
-                                                                await pg_con.execute("UPDATE aquhx.welcome SET msg = $1 WHERE guild_id = $2",   msgs, ctx.guild.id)
+                                                                await self.client.db.execute("UPDATE aquhx.welcome SET msg = $1 WHERE guild_id = $2",   msgs, ctx.guild.id)
                                                                 logs = discord.Embed(
                                                                     color=color)
                                                                 logs.set_author(
@@ -386,9 +384,9 @@ class config(Cog):
                                                                     'message',
                                                                     timeout=60.0,
                                                                     check=lambda message: message.author == ctx.author and message.channel == ctx.channel)
-                                                                res = await pg_con.fetchrow("SELECT msg FROM aquhx.goodbye WHERE guild_id = $1", ctx.guild.id)
+                                                                res = await self.client.db.fetchrow("SELECT msg FROM aquhx.goodbye WHERE guild_id = $1", ctx.guild.id)
                                                                 if res == None:
-                                                                    await pg_con.execute("INSERT INTO aquhx.goodbye(guild_id, msg) VALUES($1, $2)", ctx.guild.id, msgs)
+                                                                    await self.client.db.execute("INSERT INTO aquhx.goodbye(guild_id, msg) VALUES($1, $2)", ctx.guild.id, msgs)
                                                                     logs = discord.Embed(
                                                                         color=color)
                                                                     logs.set_author(
@@ -398,7 +396,7 @@ class config(Cog):
                                                                                     icon_url=self.client.user.avatar_url)
                                                                     await sent.edit(embed=logs)
                                                                 elif res != None:
-                                                                    await pg_con.execute("UPDATE aquhx.goodbye SET msg = $1 WHERE guild_id = $2", msgs, ctx.guild.id)
+                                                                    await self.client.db.execute("UPDATE aquhx.goodbye SET msg = $1 WHERE guild_id = $2", msgs, ctx.guild.id)
                                                                     logs = discord.Embed(
                                                                         color=color)
                                                                     logs.set_author(
@@ -431,7 +429,7 @@ class config(Cog):
 
                 elif msg.content == "dellogs":
                     try:
-                        result = await pg_con.fetchrow(f"SELECT * FROM aquhx.modlog WHERE guild_id = $1", ctx.guild.id)
+                        result = await self.client.db.fetchrow(f"SELECT * FROM aquhx.modlog WHERE guild_id = $1", ctx.guild.id)
                         if result is None:
 
                             em = discord.Embed(color=color,
@@ -439,9 +437,9 @@ class config(Cog):
 
                         elif result is not None:
 
-                            await pg_con.execute("DELETE FROM aquhx.modlog WHERE guild_id = $1", ctx.guild.id)
+                            await self.client.db.execute("DELETE FROM aquhx.modlog WHERE guild_id = $1", ctx.guild.id)
                             em = discord.Embed(color=color,
-                                               description="✅ Removed the log channel from the database database!")
+                                               description="✅ Removed the log channel from the database!")
                         await sent.edit(embed=em)
                         await msg.delete()
                     except Exception as e:
@@ -450,12 +448,12 @@ class config(Cog):
                 elif msg.content == "delmsgs":
                     try:
                         await msg.delete()
-                        res = await pg_con.fetchrow("SELECT channel_id FROM aquhx.messages WHERE guild_id = $1", ctx.guild.id)
+                        res = await self.client.db.fetchrow("SELECT channel_id FROM aquhx.messages WHERE guild_id = $1", ctx.guild.id)
                         if res == None:
                             em = discord.Embed(color=color)
                             em.description = "❌ You haven't configured a messages channel!"
                         elif res != None:
-                            await pg_con.execute("DELETE FROM aquhx.messages WHERE guild_id = $1", ctx.guild.id)
+                            await self.client.db.execute("DELETE FROM aquhx.messages WHERE guild_id = $1", ctx.guild.id)
                             em = discord.Embed(color=color,
                                                description="✅ Removed the messages channel from the database database!")
                         await sent.edit(embed=em)
@@ -467,8 +465,6 @@ class config(Cog):
         except asyncio.TimeoutError:
             await sent.delete()
             await ctx.send("[ERROR] You didn't respond in time", delete_after=10)
-        finally:
-            await pool.release(pg_con)
 
     @commands.command()
     @commands.has_permissions(manage_messages=True)

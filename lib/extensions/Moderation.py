@@ -45,9 +45,7 @@ class administrator(commands.Cog):
             await ctx.send(embed=em)
         elif member != None:
             try:
-                pool = await asyncpg.create_pool(user='postgres', password=PASSWD, database=DB, host=IP, max_inactive_connection_lifetime=1)
-                pg_con = await pool.acquire()
-                result = await pg_con.fetchrow(f"SELECT channel_id FROM aquhx.modlog WHERE guild_id = $1", ctx.guild.id)
+                result = await self.client.db.fetchrow(f"SELECT channel_id FROM aquhx.modlog WHERE guild_id = $1", ctx.guild.id)
                 if result == None:
                     c = await member.create_dm()
                     await c.send(f"You have been banned from **{ctx.guild.name}**, **Reason:** {reason}" .format(reason))
@@ -78,8 +76,8 @@ class administrator(commands.Cog):
                     embed.description = f"✅ Banned **{member.name}** for **{reason}**".format(
                         reason)
                 await ctx.send(embed=embed)
-            finally:
-                await pool.release(pg_con)
+            except Exception as e:
+                await ctx.send("{}" .format(e))
 
     @commands.command()
     @commands.has_permissions(kick_members=True)
@@ -100,9 +98,7 @@ class administrator(commands.Cog):
             await ctx.send(embed=em)
         elif member != None:
             try:
-                pool = await asyncpg.create_pool(user='postgres', password=PASSWD, database=DB, host=IP, max_inactive_connection_lifetime=1)
-                pg_con = await pool.acquire()
-                result = await pg_con.fetchrow(f"SELECT channel_id FROM aquhx.modlog WHERE guild_id = $1", ctx.guild.id)
+                result = await self.client.db.fetchrow(f"SELECT channel_id FROM aquhx.modlog WHERE guild_id = $1", ctx.guild.id)
                 if result == None:
                     c = await member.create_dm()
                     await c.send(f"You have been kicked from **{ctx.guild.name}**, **Reason:** {reason}" .format(reason))
@@ -133,8 +129,8 @@ class administrator(commands.Cog):
                     embed.description = f"✅ Kicked **{member.name}** for **{reason}**".format(
                         reason)
                 await ctx.send(embed=embed)
-            finally:
-                await pool.release(pg_con)
+            except Exception as e:
+                await ctx.send("{}" .format(e))
 
     @commands.command()
     @commands.has_permissions(ban_members=True)
@@ -155,9 +151,7 @@ class administrator(commands.Cog):
             await ctx.send(embed=em)
         elif userID != None:
             try:
-                pool = await asyncpg.create_pool(user='postgres', password=PASSWD, database=DB, host=IP, max_inactive_connection_lifetime=1)
-                pg_con = await pool.acquire()
-                result = await pg_con.fetchrow(f"SELECT channel_id FROM aquhx.modlog WHERE guild_id = $1", ctx.guild.id)
+                result = await self.client.db.fetchrow(f"SELECT channel_id FROM aquhx.modlog WHERE guild_id = $1", ctx.guild.id)
                 if result == None:
                     username = await self.client.fetch_user(int(userID))
                     user = discord.Object(id=userID)
@@ -186,8 +180,8 @@ class administrator(commands.Cog):
                     await channel.send(embed=em)
                 await ctx.send(embed=embed)
 
-            finally:
-                await pool.release(pg_con)
+            except Exception as e:
+                await ctx.send("{}" .format(e))
 
     @commands.command(aliases=['purge'])
     @commands.has_permissions(manage_messages=True)
@@ -208,9 +202,7 @@ class administrator(commands.Cog):
             await ctx.send(embed=em)
         elif amount != None:
             try:
-                pool = await asyncpg.create_pool(user='postgres', password=PASSWD, database=DB, host=IP, max_inactive_connection_lifetime=1)
-                pg_con = await pool.acquire()
-                result = await pg_con.fetchrow(f"SELECT channel_id FROM aquhx.modlog WHERE guild_id = $1", ctx.guild.id)
+                result = await self.client.db.fetchrow(f"SELECT channel_id FROM aquhx.modlog WHERE guild_id = $1", ctx.guild.id)
                 if result == None:
                     await ctx.channel.purge(limit=amount + 1)
                     em = discord.Embed(color=discord.Color.green())
@@ -237,8 +229,8 @@ class administrator(commands.Cog):
                 await asyncio.sleep(3)
                 await sent.delete()
 
-            finally:
-                await pool.release(pg_con)
+            except Exception as e:
+                await ctx.send("{}" .format(e))
 
     @commands.command()
     @commands.has_permissions(manage_messages=True)
@@ -259,9 +251,7 @@ class administrator(commands.Cog):
             await ctx.send(embed=em)
         elif member != None:
             try:
-                pool = await asyncpg.create_pool(user='postgres', password=PASSWD, database=DB, host=IP, max_inactive_connection_lifetime=1)
-                pg_con = await pool.acquire()
-                result = await pg_con.fetchrow(f"SELECT channel_id FROM aquhx.modlog WHERE guild_id = $1", ctx.guild.id)
+                result = await self.client.db.fetchrow(f"SELECT channel_id FROM aquhx.modlog WHERE guild_id = $1", ctx.guild.id)
                 role = get(ctx.guild.roles, name="Muted")
                 if result == None:
                     await ctx.message.delete()
@@ -286,8 +276,8 @@ class administrator(commands.Cog):
                     embed.set_thumbnail(url=ctx.author.avatar_url)
                     await channel.send(embed=embed)
                 await ctx.send(embed=em)
-            finally:
-                await pool.release(pg_con)
+            except Exception as e:
+                await ctx.send("{}" .format(e))
 
     @commands.command()
     @commands.has_permissions(manage_messages=True)
@@ -308,9 +298,7 @@ class administrator(commands.Cog):
             await ctx.send(embed=em)
         elif member != None:
             try:
-                pool = await asyncpg.create_pool(user='postgres', password=PASSWD, database=DB, host=IP, max_inactive_connection_lifetime=1)
-                pg_con = await pool.acquire()
-                result = await pg_con.fetchrow(f"SELECT channel_id FROM aquhx.modlog WHERE guild_id = $1", ctx.guild.id)
+                result = await self.client.db.fetchrow(f"SELECT channel_id FROM aquhx.modlog WHERE guild_id = $1", ctx.guild.id)
                 role = get(ctx.guild.roles, name="Muted")
                 if result == None:
                     await ctx.message.delete()
@@ -335,8 +323,8 @@ class administrator(commands.Cog):
                     embed.set_thumbnail(url=ctx.author.avatar_url)
                     await channel.send(embed=embed)
                 await ctx.send(embed=em)
-            finally:
-                await pool.release(pg_con)
+            except Exception as e:
+                await ctx.send("{}" .format(e))
 
 
 def setup(client):
