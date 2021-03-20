@@ -167,7 +167,7 @@ class Client(BotBase):
         for guild in self.guilds:
             pool = await asyncpg.create_pool(**dbinfo)
             pg_con = await pool.acquire()
-            result = await pg_con.fetchrow("SELECT channel_id FROM aquhx.modlog WHERE guild_id = $1", guild.id)
+            result = await pg_con.fetchrow("SELECT channel_id FROM aquhx.modlog WHERE guild_id = $1", after.guild.id)
             if result == None:
                 break
             elif result != None:
