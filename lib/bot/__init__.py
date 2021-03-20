@@ -267,11 +267,11 @@ class Developer(commands.Cog):
         if ctx.author.id in OWNER_IDS:
             await self.client.close()
             if platform.system() == "Windows":
-                os.system('python.exe lib/Scripts/dev-restart.py')
+                os.system('python.exe lib/Scripts/non-dev-restart.py')
             elif platform.system() == "Linux":
-                os.system('python3 lib/Scripts/dev-restart.py')
+                os.system('python3 lib/Scripts/non-dev-restart.py')
             elif platform.system() == "Darwin":
-                os.system('python3 lib/Scripts/dev-restart.py')
+                os.system('python3 lib/Scripts/non-dev-restart.py')
         elif ctx.author.id not in OWNER_IDS:
             pass
 
