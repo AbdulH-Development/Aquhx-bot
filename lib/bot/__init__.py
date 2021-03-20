@@ -164,32 +164,32 @@ class Client(BotBase):
     async def on_message_edit(self, before, after):
         if before.author == self.user:
             return
-        for guild in self.guilds:
-            pool = await asyncpg.create_pool(**dbinfo)
-            pg_con = await pool.acquire()
-            result = await pg_con.fetchrow("SELECT channel_id FROM aquhx.modlog WHERE guild_id = $1", after.guild.id)
-            if result == None:
-                break
-            elif result != None:
-                try:
-                    channel = self.get_channel(int(result[0]))
-                    em = Embed(color=color)
-                    em.set_author(
-                        name=f"{after.author.name} triggered an event", icon_url=self.user.avatar_url)
-                    em.description = f"""
-                    {before.author.mention} edited their message
-                    in {before.channel.mention}.
 
-                    Old
-                    ```{before.content}```
+        pool = await asyncpg.create_pool(**dbinfo)
+        pg_con = await pool.acquire()
+        result = await pg_con.fetchrow("SELECT channel_id FROM aquhx.modlog WHERE guild_id = $1", after.guild.id)
+        if result == None:
+            return
+        elif result != None:
+            try:
+                channel = self.get_channel(int(result[0]))
+                em = Embed(color=color)
+                em.set_author(
+                    name=f"{after.author.name} triggered an event", icon_url=self.user.avatar_url)
+                em.description = f"""
+                {before.author.mention} edited their message
+                in {before.channel.mention}.
 
-                    New 
-                    ```{after.content}```
-                    """
-                    em.set_thumbnail(url=self.user.avatar_url)
-                    await channel.send(embed=em)
-                except Exception as e:
-                    print(e)
+                Old
+                ```{before.content}```
+
+                New 
+                ```{after.content}```
+                """
+                em.set_thumbnail(url=self.user.avatar_url)
+                await channel.send(embed=em)
+            except Exception as e:
+                print(e)
 
     async def on_message_delete(self, message):
         pool = await asyncpg.create_pool(**dbinfo)
