@@ -164,74 +164,84 @@ class Client(BotBase):
     async def on_message_edit(self, before, after):
         if before.author == self.user:
             return
+        try:
 
-        pool = await asyncpg.create_pool(**dbinfo)
-        pg_con = await pool.acquire()
-        result = await pg_con.fetchrow("SELECT channel_id FROM aquhx.modlog WHERE guild_id = $1", after.guild.id)
-        if result == None:
-            return
-        elif result != None:
-            try:
-                channel = self.get_channel(int(result[0]))
-                em = Embed(color=color)
-                em.set_author(
-                    name=f"{after.author.name} triggered an event", icon_url=self.user.avatar_url)
-                em.description = f"""
-                {before.author.mention} edited their message
-                in {before.channel.mention}.
+            pool = await asyncpg.create_pool(**dbinfo)
+            pg_con = await pool.acquire()
+            result = await pg_con.fetchrow("SELECT channel_id FROM aquhx.modlog WHERE guild_id = $1", after.guild.id)
+            if result == None:
+                return
+            elif result != None:
+                try:
+                    channel = self.get_channel(int(result[0]))
+                    em = Embed(color=color)
+                    em.set_author(
+                        name=f"{after.author.name} triggered an event", icon_url=self.user.avatar_url)
+                    em.description = f"""
+                    {before.author.mention} edited their message
+                    in {before.channel.mention}.
 
-                Old
-                ```{before.content}```
+                    Old
+                    ```{before.content}```
 
-                New 
-                ```{after.content}```
-                """
-                em.set_thumbnail(url=self.user.avatar_url)
-                await channel.send(embed=em)
-            except Exception as e:
-                print(e)
+                    New 
+                    ```{after.content}```
+                    """
+                    em.set_thumbnail(url=self.user.avatar_url)
+                    await channel.send(embed=em)
+                except Exception as e:
+                    print(e)
+        finally:
+            await pool.release(pg_con)
 
     async def on_message_delete(self, message):
-        pool = await asyncpg.create_pool(**dbinfo)
-        pg_con = await pool.acquire()
         if message.author == self.user:
             return
-        result = await pg_con.fetchrow('SELECT channel_id FROM aquhx.modlog WHERE guild_id = $1', message.guild.id)
-        if result == None:
-            return
-        elif result != None:
-            try:
-                channel = self.get_channel(int(result[0]))
-                em = Embed(color=color)
-                em.description = f"""
-                {message.author.mention} deleted a message
-                in {message.channel.mention}
+        try:
+            pool = await asyncpg.create_pool(**dbinfo)
+            pg_con = await pool.acquire()
+            result = await pg_con.fetchrow('SELECT channel_id FROM aquhx.modlog WHERE guild_id = $1', message.guild.id)
+            if result == None:
+                return
+            elif result != None:
+                try:
+                    channel = self.get_channel(int(result[0]))
+                    em = Embed(color=color)
+                    em.description = f"""
+                    {message.author.mention} deleted a message
+                    in {message.channel.mention}
 
-                Content
-                ```{message.content}```
-                """
-                em.set_thumbnail(url=self.user.avatar_url)
-                em.set_footer(text=f"")
-                await channel.send(embed=em)
-            except Exception as e:
-                print(e)
+                    Content
+                    ```{message.content}```
+                    """
+                    em.set_thumbnail(url=self.user.avatar_url)
+                    em.set_footer(text=f"")
+                    await channel.send(embed=em)
+                except Exception as e:
+                    print(e)
+        finally:
+            await pool.release(pg_con)
 
     async def on_member_join(self, member):
-        result = await self.client.db.fetchrow("SELECT channel_id FROM aquhx.messages WHERE guild_id = $1", member.guild.id)
-        if result == None:
-            return
-        elif result != None:
-            try:
-                mention = member.mention
-                members = len(list(member.guild.members))
-                user = member.name
-                channel = self.get_channel(int(result[0]))
-                welcome = self.client.db.fetchrow(
-                    "SELECT welcome FROM aquhx.welcome WHERE guild_id = $1", member.guild.id)
-                await channel.send(str(welcome[0]) .format(members=members, mention=mention, user=user))
-            except Exception as e:
-                print(e)
-
+        try:
+            pool = await asyncpg.create_pool(**dbinfo)
+            pg_con = await pool.acquire()
+            result = await pg_con.fetchrow("SELECT channel_id FROM aquhx.messages WHERE guild_id = $1", member.guild.id)
+            if result == None:
+                return
+            elif result != None:
+                try:
+                    mention = member.mention
+                    members = len(list(member.guild.members))
+                    user = member.name
+                    channel = self.get_channel(int(result[0]))
+                    welcome = self.client.db.fetchrow(
+                        "SELECT welcome FROM aquhx.welcome WHERE guild_id = $1", member.guild.id)
+                    await channel.send(str(welcome[0]) .format(members=members, mention=mention, user=user))
+                except Exception as e:
+                    print(e)
+        finally:
+            await pool.release(pg_con)
 
 
 f = open('lib/config/config.json', 'r')

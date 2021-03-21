@@ -7,6 +7,8 @@ import asyncio
 import psycopg2
 import praw
 import random
+import requests
+import json
 from random import randint
 from typing import List, Union
 from discord.ext import commands
@@ -22,6 +24,9 @@ load_dotenv()
 PASSWD = os.getenv("PASSWD")
 load_dotenv()
 DB = os.getenv("DB")
+load_dotenv()
+KEY = os.getenv("API")
+base_url = "http://api.openweathermap.org/data/2.5/weather?"
 
 reddit = praw.Reddit(client_id='c_85u5DZ793OFQ',
                      client_secret='iBBJIhWmv6uB3E6R7UNlgC7t8Go',
