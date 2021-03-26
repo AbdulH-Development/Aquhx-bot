@@ -1,3 +1,25 @@
+"""
+Copyright (c) 2021 DevCairo
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+"""
+
 from discord.ext.commands import Bot as BotBase
 from discord.ext.commands import when_mentioned_or
 from discord.ext.commands import command
@@ -43,11 +65,6 @@ dbinfo2 = {
 PREFIX = when_mentioned_or("$")
 OWNER_IDS = [541722893747224589]
 color = 0xfffafa
-
-
-async def create_db_pool():
-    pool = await asyncpg.create_pool(**dbinfo)
-    client.db = await pool.acquire()
 
 
 def get_prefix(client, message):
@@ -144,105 +161,6 @@ class Client(BotBase):
             await ctx.send(embed=em)
             return
 
-    async def on_guild_join(self, guild):
-        await guild.create_role(name="Muted")
-        try:
-            pool = await asyncpg.create_pool(**dbinfo)
-            pg_con = await pool.acquire()
-            await pg_con.execute("INSERT INTO aquhx.prefixes(guild_id, prefix) VALUES($1, $2)", guild.id, "$")
-        finally:
-            await pool.release(pg_con)
-
-    async def on_guild_remove(self, guild):
-        try:
-            pool = await asyncpg.create_pool(**dbinfo)
-            pg_con = await pool.acquire()
-            await pg_con.execute("DELETE FROM aquhx.prefixes WHERE guild_id = $1", guild.id)
-        finally:
-            await pool.release(pg_con)
-
-    async def on_message_edit(self, before, after):
-        if before.author == self.user:
-            return
-        try:
-
-            pool = await asyncpg.create_pool(**dbinfo)
-            pg_con = await pool.acquire()
-            result = await pg_con.fetchrow("SELECT channel_id FROM aquhx.modlog WHERE guild_id = $1", after.guild.id)
-            if result == None:
-                return
-            elif result != None:
-                try:
-                    channel = self.get_channel(int(result[0]))
-                    em = Embed(color=color)
-                    em.set_author(
-                        name=f"{after.author.name} triggered an event", icon_url=self.user.avatar_url)
-                    em.description = f"""
-                    {before.author.mention} edited their message
-                    in {before.channel.mention}.
-
-                    Old
-                    ```{before.content}```
-
-                    New 
-                    ```{after.content}```
-                    """
-                    em.set_thumbnail(url=self.user.avatar_url)
-                    await channel.send(embed=em)
-                except Exception as e:
-                    print(e)
-        finally:
-            await pool.release(pg_con)
-
-    async def on_message_delete(self, message):
-        if message.author == self.user:
-            return
-        try:
-            pool = await asyncpg.create_pool(**dbinfo)
-            pg_con = await pool.acquire()
-            result = await pg_con.fetchrow('SELECT channel_id FROM aquhx.modlog WHERE guild_id = $1', message.guild.id)
-            if result == None:
-                return
-            elif result != None:
-                try:
-                    channel = self.get_channel(int(result[0]))
-                    em = Embed(color=color)
-                    em.description = f"""
-                    {message.author.mention} deleted a message
-                    in {message.channel.mention}
-
-                    Content
-                    ```{message.content}```
-                    """
-                    em.set_thumbnail(url=self.user.avatar_url)
-                    em.set_footer(text=f"")
-                    await channel.send(embed=em)
-                except Exception as e:
-                    print(e)
-        finally:
-            await pool.release(pg_con)
-
-    async def on_member_join(self, member):
-        try:
-            pool = await asyncpg.create_pool(**dbinfo)
-            pg_con = await pool.acquire()
-            result = await pg_con.fetchrow("SELECT channel_id FROM aquhx.messages WHERE guild_id = $1", member.guild.id)
-            if result == None:
-                return
-            elif result != None:
-                try:
-                    mention = member.mention
-                    members = len(list(member.guild.members))
-                    user = member.name
-                    channel = self.get_channel(int(result[0]))
-                    welcome = self.client.db.fetchrow(
-                        "SELECT welcome FROM aquhx.welcome WHERE guild_id = $1", member.guild.id)
-                    await channel.send(str(welcome[0]) .format(members=members, mention=mention, user=user))
-                except Exception as e:
-                    print(e)
-        finally:
-            await pool.release(pg_con)
-
 
 f = open('lib/config/config.json', 'r')
 data = json.load(f)
@@ -250,42 +168,9 @@ client = Client()
 VERSION = data['Version']
 
 
-class Developer(commands.Cog):
-    def __init__(self, client):
-        self.client = client
+async def create_db_pool():
+    pool = await asyncpg.create_pool(**dbinfo)
+    client.db = await pool.acquire()
 
-    @command(aliases=['reload'])
-    async def _reload(self, ctx):
-        if ctx.author.id in OWNER_IDS:
-            try:
-                for cog in os.listdir('./lib/extensions'):
-                    if cog.endswith('.py'):
-                        client.reload_extension(f'lib.extensions.{cog[:-3]}')
-                em = Embed(color=color)
-                em.description = "✅ Reloaded extensions"
-                await ctx.send(embed=em)
-            except Exception as e:
-                em = Embed(color=color)
-                em.description = "❌ {}".format(e)
-                await ctx.send(embed=em)
-        elif ctx.author.id not in OWNER_IDS:
-            em = Embed(color=color)
-            em.description = "❌ You don't have permission to run this."
-
-    @command(aliases=['_restart'])
-    async def restart(self, ctx):
-        if ctx.author.id in OWNER_IDS:
-            await self.client.close()
-            if platform.system() == "Windows":
-                os.system('python.exe lib/Scripts/non-dev-restart.py')
-            elif platform.system() == "Linux":
-                os.system('python3 lib/Scripts/non-dev-restart.py')
-            elif platform.system() == "Darwin":
-                os.system('python3 lib/Scripts/non-dev-restart.py')
-        elif ctx.author.id not in OWNER_IDS:
-            pass
-
-
-client.add_cog(Developer(client))
 
 asyncio.get_event_loop().run_until_complete(create_db_pool())
