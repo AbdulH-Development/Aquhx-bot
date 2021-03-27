@@ -146,7 +146,7 @@ class Fun(commands.Cog):
             await ctx.send(embed=em)
         elif words != None:
             try:
-                result = await self.client.db.fetchrow(f"SELECT channel_id FROM aquhx.modlog WHERE guild_id = $1", ctx.guild.id)
+                result = await self.client.db.fetchrow(f"SELECT channel_id FROM Cairo.modlog WHERE guild_id = $1", ctx.guild.id)
                 if result == None:
                     await ctx.message.delete()
                     await asyncio.sleep(.5)
@@ -231,7 +231,7 @@ class Fun(commands.Cog):
         current_time = time.strftime("%I:%M %p", t)
         em1 = discord.Embed(color=color)
         em1.set_author(icon_url=self.client.user.avatar_url,
-                       name="Aquhx moderation list")
+                       name="Cairo moderation list")
 
         em1.add_field(name="Ban", value="Ban a member")
         em1.add_field(name="Unban", value="Unban a user")
@@ -246,7 +246,7 @@ class Fun(commands.Cog):
 
         em3 = discord.Embed(color=color)
         em3.set_author(icon_url=self.client.user.avatar_url,
-                       name="Aquhx command list")
+                       name="Cairo command list")
         em3.add_field(name="Say", value="Say something")
         em3.add_field(name="Embed", value="Embed something")
         em3.add_field(name="Poll", value="Vote on something")

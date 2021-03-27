@@ -57,7 +57,7 @@ class Developer(commands.Cog):
 
     @Cog.listener()
     async def on_member_join(self, member):
-        fetch = await self.client.db.fetchrow("SELECT channel_id FROM aquhx.messages WHERE guild_id = $1", member.guild.id)
+        fetch = await self.client.db.fetchrow("SELECT channel_id FROM db.messages WHERE guild_id = $1", member.guild.id)
         if fetch == None:
             return
         elif fetch != None:
@@ -65,7 +65,7 @@ class Developer(commands.Cog):
                 mention = member.mention
                 members = len(list(member.guild.members))
                 user = member.name
-                welcome = await self.client.db.fetchrow("SELECT welcome FROM aquhx.welcome WHERE guild_id = $1", member.guild.id)
+                welcome = await self.client.db.fetchrow("SELECT welcome FROM db.welcome WHERE guild_id = $1", member.guild.id)
                 if welcome == None:
                     return
                 channel = self.client.get_channel(int(fetch[0]))
@@ -75,7 +75,7 @@ class Developer(commands.Cog):
 
     @Cog.listener()
     async def on_member_remove(self, member):
-        fetch = await self.client.db.fetchrow("SELECT channel_id FROM aquhx.messages WHERE guild_id = $1", member.guild.id)
+        fetch = await self.client.db.fetchrow("SELECT channel_id FROM db.messages WHERE guild_id = $1", member.guild.id)
         if fetch == None:
             return
         elif fetch != None:
@@ -83,7 +83,7 @@ class Developer(commands.Cog):
                 mention = member.mention
                 members = len(list(member.guild.members))
                 user = member.name
-                welcome = await self.client.db.fetchrow("SELECT goodbye FROM aquhx.goodbye WHERE guild_id = $1", member.guild.id)
+                welcome = await self.client.db.fetchrow("SELECT goodbye FROM db.goodbye WHERE guild_id = $1", member.guild.id)
                 if welcome == None:
                     return
                 channel = self.client.get_channel(int(fetch[0]))
@@ -94,11 +94,11 @@ class Developer(commands.Cog):
     @Cog.listener()
     async def on_guild_join(self, guild):
         await guild.create_role(name="Muted")
-        await self.client.db.execute("INSERT INTO aquhx.prefixes(guild_id, prefix) VALUES($1, $2)", guild.id, "$")
+        await self.client.db.execute("INSERT INTO db.prefixes(guild_id, prefix) VALUES($1, $2)", guild.id, "$")
 
     @Cog.listener()
     async def on_guild_remove(self, guild):
-        await self.client.db.execute("DELETE FROM aquhx.prefixes WHERE guild_id = $1", guild.id)
+        await self.client.db.execute("DELETE FROM db.prefixes WHERE guild_id = $1", guild.id)
 
     @Cog.listener()
     async def on_message_edit(self, before, after):
@@ -107,7 +107,7 @@ class Developer(commands.Cog):
         if after.author.bot:
             return
 
-        result = await self.client.db.fetchrow("SELECT channel_id FROM aquhx.modlog WHERE guild_id = $1", after.guild.id)
+        result = await self.client.db.fetchrow("SELECT channel_id FROM db.modlog WHERE guild_id = $1", after.guild.id)
         if result == None:
             return
         msg = str(before.content)
@@ -134,7 +134,7 @@ class Developer(commands.Cog):
         if message.author.bot:
             return
         elif message.author != self.client.user:
-            result = await self.client.db.fetchrow('SELECT channel_id FROM aquhx.modlog WHERE guild_id = $1', message.guild.id)
+            result = await self.client.db.fetchrow('SELECT channel_id FROM db.modlog WHERE guild_id = $1', message.guild.id)
             if result == None:
                 return
             elif result != None:

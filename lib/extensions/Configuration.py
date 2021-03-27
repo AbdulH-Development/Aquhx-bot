@@ -51,16 +51,16 @@ class config(Cog):
     @commands.has_permissions(manage_guild=True)
     async def setup(self, ctx):
         em = discord.Embed(color=color)
-        em.set_author(name="Aquhx setup wizard")
+        em.set_author(name="Cairo setup wizard")
         em.description = """
-        Welcome to the Aquhx setup wizard,
+        Welcome to the Cairo setup wizard,
         please select a channel to setup by using the name.
         **logs** : Configure your log channel.
         **addmsgs** : Configure your welcome/goodbye messages and channel.
         **dellogs** : Remove the log channel from the database.
         **delmsgs** : Remove the welcome/goodbye channel and messages from the database.
         """
-        em.set_footer(text="Aquhx setup wizard",
+        em.set_footer(text="Cairo setup wizard",
                       icon_url=self.client.user.avatar_url)
         sent = await ctx.send(embed=em)
 
@@ -72,9 +72,9 @@ class config(Cog):
             if msg:
                 if msg.content == "logs":
                     logs = discord.Embed(color=color)
-                    logs.set_author(name="Aquhx log wizard")
+                    logs.set_author(name="Cairo log wizard")
                     logs.description = "Welcome to the log wizard,\nplease provide me with a channel ID\nExample. 818598634823090197 <- if you try to use that it won't work for you."
-                    logs.set_footer(text="Aquhx log wizard",
+                    logs.set_footer(text="Cairo log wizard",
                                     icon_url=self.client.user.avatar_url)
                     await sent.edit(embed=logs)
                     try:
@@ -87,14 +87,14 @@ class config(Cog):
                             try:
                                 log = ID.content
                                 await ID.delete()
-                                res = await self.client.db.fetchrow("SELECT channel_id FROM aquhx.modlog WHERE guild_id = $1", ctx.guild.id)
+                                res = await self.client.db.fetchrow("SELECT channel_id FROM db.modlog WHERE guild_id = $1", ctx.guild.id)
                                 if res == None:
-                                    await self.client.db.execute("INSERT INTO aquhx.modlog(guild_id, channel_id) VALUES($1, $2)", ctx.guild.id, int(log))
+                                    await self.client.db.execute("INSERT INTO db.modlog(guild_id, channel_id) VALUES($1, $2)", ctx.guild.id, int(log))
                                     em = discord.Embed(color=color,
                                                        description="✅ Set logs channel!")
                                     await sent.edit(embed=em)
                                 elif res != None:
-                                    await self.client.db.execute("UPDATE aquhx.modlog SET channel_id = $1 WHERE guild_id = $2", int(log), ctx.guild.id)
+                                    await self.client.db.execute("UPDATE db.modlog SET channel_id = $1 WHERE guild_id = $2", int(log), ctx.guild.id)
                                     em = discord.Embed(color=color,
                                                        description="✅ Updated logs channel!")
                                     await sent.edit(embed=em)
@@ -105,9 +105,9 @@ class config(Cog):
 
                 elif msg.content == "addmsgs":
                     logs = discord.Embed(color=color)
-                    logs.set_author(name="Aquhx msgs wizard")
+                    logs.set_author(name="Cairo msgs wizard")
                     logs.description = "Welcome to the msgs wizard,\nplease provide me with a channel ID\nExample. 818598634823090197 <- if you try to use that it won't work for you."
-                    logs.set_footer(text="Aquhx msgs wizard",
+                    logs.set_footer(text="Cairo msgs wizard",
                                     icon_url=self.client.user.avatar_url)
                     await sent.edit(embed=logs)
                     try:
@@ -119,27 +119,27 @@ class config(Cog):
                         if ID:
                             n = ID.content
                             await ID.delete()
-                            res = await self.client.db.fetchrow("SELECT channel_id FROM aquhx.messages WHERE guild_id = $1", ctx.guild.id)
+                            res = await self.client.db.fetchrow("SELECT channel_id FROM db.messages WHERE guild_id = $1", ctx.guild.id)
                             if res == None:
-                                await self.client.db.execute("INSERT INTO aquhx.messages(guild_id, channel_id) VALUES($1, $2)", ctx.guild.id, int(n))
+                                await self.client.db.execute("INSERT INTO db.messages(guild_id, channel_id) VALUES($1, $2)", ctx.guild.id, int(n))
                                 em = discord.Embed(color=color)
-                                em.set_author(name="Aquhx msgs wizard")
+                                em.set_author(name="Cairo msgs wizard")
                                 em.description = "✅ Set the message channel"
                                 em.set_footer(
-                                    text="Aquhx msgs wizard", icon_url=self.client.user.avatar_url)
+                                    text="Cairo msgs wizard", icon_url=self.client.user.avatar_url)
                             elif res != None:
-                                await self.client.db.execute("UPDATE aquhx.messages SET channel_id = $1 WHERE guild_id = $2", int(n), ctx.guild.id)
+                                await self.client.db.execute("UPDATE db.messages SET channel_id = $1 WHERE guild_id = $2", int(n), ctx.guild.id)
                                 em = discord.Embed(color=color)
-                                em.set_author(name="Aquhx msgs wizard")
+                                em.set_author(name="Cairo msgs wizard")
                                 em.description = "✅ Set the message channel"
                                 em.set_footer(
-                                    text="Aquhx msgs wizard", icon_url=self.client.user.avatar_url)
+                                    text="Cairo msgs wizard", icon_url=self.client.user.avatar_url)
                             await sent.edit(embed=em)
                             await asyncio.sleep(3)
                             logs = discord.Embed(color=color)
-                            logs.set_author(name="Aquhx msgs wizard")
+                            logs.set_author(name="Cairo msgs wizard")
                             logs.description = "Next I require a welcome message."
-                            logs.set_footer(text="Aquhx msgs wizard",
+                            logs.set_footer(text="Cairo msgs wizard",
                                             icon_url=self.client.user.avatar_url)
                             await sent.edit(embed=logs)
                             try:
@@ -151,31 +151,31 @@ class config(Cog):
                                     try:
                                         await wel.delete()
                                         msgs = wel.content
-                                        res = await self.client.db.fetchrow("SELECT msg FROM aquhx.welcome WHERE guild_id = $1", ctx.guild.id)
+                                        res = await self.client.db.fetchrow("SELECT msg FROM db.welcome WHERE guild_id = $1", ctx.guild.id)
                                         if res == None:
-                                            await self.client.db.execute("INSERT INTO aquhx.welcome(guild_id, msg) VALUES($1, $2)", ctx.guild.id, msgs)
+                                            await self.client.db.execute("INSERT INTO db.welcome(guild_id, msg) VALUES($1, $2)", ctx.guild.id, msgs)
                                             logs = discord.Embed(color=color)
                                             logs.set_author(
-                                                name="Aquhx msgs wizard")
+                                                name="Cairo msgs wizard")
                                             logs.description = "✅ Set the welcome message!"
-                                            logs.set_footer(text="Aquhx msgs wizard",
+                                            logs.set_footer(text="Cairo msgs wizard",
                                                             icon_url=self.client.user.avatar_url)
                                             await sent.edit(embed=logs)
                                         elif res != None:
-                                            await self.client.db.execute("UPDATE aquhx.welcome SET msg = $1 WHERE guild_id = $2", msgs, ctx.guild.id)
+                                            await self.client.db.execute("UPDATE db.welcome SET msg = $1 WHERE guild_id = $2", msgs, ctx.guild.id)
                                             logs = discord.Embed(color=color)
                                             logs.set_author(
-                                                name="Aquhx msgs wizard")
+                                                name="Cairo msgs wizard")
                                             logs.description = "✅ Updated the welcome message!"
-                                            logs.set_footer(text="Aquhx msgs wizard",
+                                            logs.set_footer(text="Cairo msgs wizard",
                                                             icon_url=self.client.user.avatar_url)
                                             await sent.edit(embed=logs)
                                         await asyncio.sleep(3)
                                         logs = discord.Embed(color=color)
                                         logs.set_author(
-                                            name="Aquhx msgs wizard")
+                                            name="Cairo msgs wizard")
                                         logs.description = "Next I require a goodbye message."
-                                        logs.set_footer(text="Aquhx msgs wizard",
+                                        logs.set_footer(text="Cairo msgs wizard",
                                                         icon_url=self.client.user.avatar_url)
                                         await sent.edit(embed=logs)
                                         try:
@@ -187,44 +187,44 @@ class config(Cog):
                                                 try:
                                                     msgs = good.content
                                                     await good.delete()
-                                                    res = await self.client.db.fetchrow("SELECT msg FROM aquhx.goodbye WHERE guild_id = $1", ctx.guild.id)
+                                                    res = await self.client.db.fetchrow("SELECT msg FROM db.goodbye WHERE guild_id = $1", ctx.guild.id)
                                                     if res == None:
-                                                        await self.client.db.execute("INSERT INTO aquhx.goodbye(guild_id, msg) VALUES($1, $2)", ctx.guild.id, msgs)
+                                                        await self.client.db.execute("INSERT INTO db.goodbye(guild_id, msg) VALUES($1, $2)", ctx.guild.id, msgs)
                                                         logs = discord.Embed(
                                                             color=color)
                                                         logs.set_author(
-                                                            name="Aquhx msgs wizard")
+                                                            name="Cairo msgs wizard")
                                                         logs.description = "✅ Set goodbye message."
-                                                        logs.set_footer(text="Aquhx msgs wizard",
+                                                        logs.set_footer(text="Cairo msgs wizard",
                                                                         icon_url=self.client.user.avatar_url)
                                                         await sent.edit(embed=logs)
                                                     elif res != None:
-                                                        await self.client.db.execute("UPDATE aquhx.goodbye SET msg = $1 WHERE guild_id = $2", msgs, ctx.guild.id)
+                                                        await self.client.db.execute("UPDATE db.goodbye SET msg = $1 WHERE guild_id = $2", msgs, ctx.guild.id)
                                                         logs = discord.Embed(
                                                             color=color)
                                                         logs.set_author(
-                                                            name="Aquhx msgs wizard")
+                                                            name="Cairo msgs wizard")
                                                         logs.description = "✅ Updated goodbye message."
-                                                        logs.set_footer(text="Aquhx msgs wizard",
+                                                        logs.set_footer(text="Cairo msgs wizard",
                                                                         icon_url=self.client.user.avatar_url)
                                                         await sent.edit(embed=logs)
                                                     await asyncio.sleep(3)
                                                     em = discord.Embed(
                                                         color=color)
                                                     em.set_author(
-                                                        name="Aquhx msgs wizard")
-                                                    em.description = "✅ Completed all tasks, thank you for using Aquhx"
+                                                        name="Cairo msgs wizard")
+                                                    em.description = "✅ Completed all tasks, thank you for using Cairo"
                                                     em.set_footer(
-                                                        text="Aquhx msgs wizard", icon_url=self.client.user.avatar_url)
+                                                        text="Cairo msgs wizard", icon_url=self.client.user.avatar_url)
                                                     await sent.edit(embed=em)
                                                 except Exception as e:
                                                     await ctx.send("{}" .format(e))
                                         except asyncio.TimeoutError:
                                             logs = discord.Embed(color=color)
                                             logs.set_author(
-                                                name="Aquhx msgs wizard")
+                                                name="Cairo msgs wizard")
                                             logs.description = "Do you want to continue without a goodbye message? Y, N"
-                                            logs.set_footer(text="Aquhx msgs wizard",
+                                            logs.set_footer(text="Cairo msgs wizard",
                                                             icon_url=self.client.user.avatar_url)
                                             await sent.edit(embed=logs)
                                             try:
@@ -239,10 +239,10 @@ class config(Cog):
                                                             em = discord.Embed(
                                                                 color=color)
                                                             em.set_author(
-                                                                name="Aquhx msgs wizard")
-                                                            em.description = "✅ Completed all tasks, thank you for using Aquhx"
+                                                                name="Cairo msgs wizard")
+                                                            em.description = "✅ Completed all tasks, thank you for using Cairo"
                                                             em.set_footer(
-                                                                text="Aquhx msgs wizard", icon_url=self.client.user.avatar_url)
+                                                                text="Cairo msgs wizard", icon_url=self.client.user.avatar_url)
                                                             await sent.edit(embed=em)
                                                         elif answer == "N" or 'n':
                                                             try:
@@ -253,35 +253,35 @@ class config(Cog):
                                                                 if good:
                                                                     try:
                                                                         await good.delete()
-                                                                        res = await self.client.db.fetchrow("SELECT msg FROM aquhx.goodbye WHERE guild_id = $1", ctx.guild.id)
+                                                                        res = await self.client.db.fetchrow("SELECT msg FROM db.goodbye WHERE guild_id = $1", ctx.guild.id)
                                                                         if res == None:
-                                                                            await self.client.db.execute("INSERT INTO aquhx.goodbye(guild_id, msg) VALUES($1, $2)", ctx.guild.id, msgs)
+                                                                            await self.client.db.execute("INSERT INTO db.goodbye(guild_id, msg) VALUES($1, $2)", ctx.guild.id, msgs)
                                                                             logs = discord.Embed(
                                                                                 color=color)
                                                                             logs.set_author(
-                                                                                name="Aquhx msgs wizard")
+                                                                                name="Cairo msgs wizard")
                                                                             logs.description = "✅ Set goodbye message."
-                                                                            logs.set_footer(text="Aquhx msgs wizard",
+                                                                            logs.set_footer(text="Cairo msgs wizard",
                                                                                             icon_url=self.client.user.avatar_url)
                                                                             await sent.edit(embed=logs)
                                                                         elif res != None:
-                                                                            await self.client.db.execute("UPDATE aquhx.goodbye SET msg = $1 WHERE guild_id = $2", msgs, ctx.guild.id)
+                                                                            await self.client.db.execute("UPDATE db.goodbye SET msg = $1 WHERE guild_id = $2", msgs, ctx.guild.id)
                                                                             logs = discord.Embed(
                                                                                 color=color)
                                                                             logs.set_author(
-                                                                                name="Aquhx msgs wizard")
+                                                                                name="Cairo msgs wizard")
                                                                             logs.description = "✅ Updated goodbye message."
-                                                                            logs.set_footer(text="Aquhx msgs wizard",
+                                                                            logs.set_footer(text="Cairo msgs wizard",
                                                                                             icon_url=self.client.user.avatar_url)
                                                                             await sent.edit(embed=logs)
                                                                         await asyncio.sleep(3)
                                                                         em = discord.Embed(
                                                                             color=color)
                                                                         em.set_author(
-                                                                            name="Aquhx msgs wizard")
-                                                                        em.description = "✅ Completed all tasks, thank you for using Aquhx"
+                                                                            name="Cairo msgs wizard")
+                                                                        em.description = "✅ Completed all tasks, thank you for using Cairo"
                                                                         em.set_footer(
-                                                                            text="Aquhx msgs wizard", icon_url=self.client.user.avatar_url)
+                                                                            text="Cairo msgs wizard", icon_url=self.client.user.avatar_url)
                                                                         await sent.edit(embed=em)
                                                                     except Exception as e:
                                                                         await ctx.send("{}" .format(e))
@@ -296,9 +296,9 @@ class config(Cog):
                             except asyncio.TimeoutError:
                                 logs = discord.Embed(color=color)
                                 logs.set_author(
-                                    name="Aquhx msgs wizard")
+                                    name="Cairo msgs wizard")
                                 logs.description = "Would you like to continue without a welcome message set?. Y, N"
-                                logs.set_footer(text="Aquhx msgs wizard",
+                                logs.set_footer(text="Cairo msgs wizard",
                                                 icon_url=self.client.user.avatar_url)
                                 await sent.edit(embed=logs)
                                 try:
@@ -313,9 +313,9 @@ class config(Cog):
                                                 logs = discord.Embed(
                                                     color=color)
                                                 logs.set_author(
-                                                    name="Aquhx msgs wizard")
+                                                    name="Cairo msgs wizard")
                                                 logs.description = "Next I require a goodbye message."
-                                                logs.set_footer(text="Aquhx msgs wizard",
+                                                logs.set_footer(text="Cairo msgs wizard",
                                                                 icon_url=self.client.user.avatar_url)
                                                 await sent.edit(embed=logs)
                                                 try:
@@ -325,24 +325,24 @@ class config(Cog):
                                                         check=lambda message: message.author == ctx.author and message.channel == ctx.channel)
                                                     try:
                                                         msgs = good.content
-                                                        res = await self.client.db.fetchrow("SELECT msg FROM aquhx.goodbye WHERE guild_id = $1", ctx.guild.id)
+                                                        res = await self.client.db.fetchrow("SELECT msg FROM db.goodbye WHERE guild_id = $1", ctx.guild.id)
                                                         if res == None:
-                                                            await self.client.db.execute("INSERT INTO aquhx.goodbye(guild_id, msg) VALUES($1, $2)", ctx.guild.id, msgs)
+                                                            await self.client.db.execute("INSERT INTO db.goodbye(guild_id, msg) VALUES($1, $2)", ctx.guild.id, msgs)
                                                             logs = discord.Embed(
                                                                 color=color)
                                                             logs.set_author(
-                                                                name="Aquhx msgs wizard")
+                                                                name="Cairo msgs wizard")
                                                             logs.description = "✅ Set goodbye message."
-                                                            logs.set_footer(text="Aquhx msgs wizard",
+                                                            logs.set_footer(text="Cairo msgs wizard",
                                                                             icon_url=self.client.user.avatar_url)
                                                         elif res != None:
-                                                            await self.client.db.execute("UPDATE aquhx.goodbye SET msg = $1 WHERE guild_id = $2",   msgs, ctx.guild.id)
+                                                            await self.client.db.execute("UPDATE db.goodbye SET msg = $1 WHERE guild_id = $2",   msgs, ctx.guild.id)
                                                             logs = discord.Embed(
                                                                 color=color)
                                                             logs.set_author(
-                                                                name="Aquhx msgs wizard")
+                                                                name="Cairo msgs wizard")
                                                             logs.description = "✅ Updated goodbye message."
-                                                            logs.set_footer(text="Aquhx msgs wizard",
+                                                            logs.set_footer(text="Cairo msgs wizard",
                                                                             icon_url=self.client.user.avatar_url)
                                                         await sent.edit(embed=logs)
                                                         await good.delete()
@@ -350,10 +350,10 @@ class config(Cog):
                                                         em = discord.Embed(
                                                             color=color)
                                                         em.set_author(
-                                                            name="Aquhx msgs wizard")
-                                                        em.description = "✅ Completed all tasks, thank you for using Aquhx"
+                                                            name="Cairo msgs wizard")
+                                                        em.description = "✅ Completed all tasks, thank you for using Cairo"
                                                         em.set_footer(
-                                                            text="Aquhx msgs wizard", icon_url=self.client.user.avatar_url)
+                                                            text="Cairo msgs wizard", icon_url=self.client.user.avatar_url)
                                                         await sent.edit(embed=em)
                                                     except Exception as e:
                                                         await ctx.send("{}".format(e))
@@ -365,9 +365,9 @@ class config(Cog):
                                                 logs = discord.Embed(
                                                     color=color)
                                                 logs.set_author(
-                                                    name="Aquhx msgs wizard")
+                                                    name="Cairo msgs wizard")
                                                 logs.description = "Next I require a welcome message."
-                                                logs.set_footer(text="Aquhx msgs wizard",
+                                                logs.set_footer(text="Cairo msgs wizard",
                                                                 icon_url=self.client.user.avatar_url)
                                                 await sent.edit(embed=logs)
                                                 try:
@@ -378,17 +378,17 @@ class config(Cog):
                                                     if good:
                                                         try:
                                                             msgs = good.content
-                                                            res = await self.client.db.fetchrow("SELECT msg FROM aquhx.welcome WHERE guild_id = $1", ctx.guild.id)
+                                                            res = await self.client.db.fetchrow("SELECT msg FROM db.welcome WHERE guild_id = $1", ctx.guild.id)
                                                             if res == None:
-                                                                await self.client.db.execute("INSERT INTO aquhx.welcome(guild_id, msg) VALUES($1, $2)", ctx.guild.id, msgs)
+                                                                await self.client.db.execute("INSERT INTO db.welcome(guild_id, msg) VALUES($1, $2)", ctx.guild.id, msgs)
                                                             elif res != None:
-                                                                await self.client.db.execute("UPDATE aquhx.welcome SET msg = $1 WHERE guild_id = $2",   msgs, ctx.guild.id)
+                                                                await self.client.db.execute("UPDATE db.welcome SET msg = $1 WHERE guild_id = $2",   msgs, ctx.guild.id)
                                                                 logs = discord.Embed(
                                                                     color=color)
                                                                 logs.set_author(
-                                                                    name="Aquhx msgs wizard")
+                                                                    name="Cairo msgs wizard")
                                                                 logs.description = "✅ Updated welcome message."
-                                                                logs.set_footer(text="Aquhx msgs wizard",
+                                                                logs.set_footer(text="Cairo msgs wizard",
                                                                                 icon_url=self.client.user.avatar_url)
                                                             await sent.edit(embed=logs)
                                                             await good.delete()
@@ -396,9 +396,9 @@ class config(Cog):
                                                             logs = discord.Embed(
                                                                 color=color)
                                                             logs.set_author(
-                                                                name="Aquhx msgs wizard")
+                                                                name="Cairo msgs wizard")
                                                             logs.description = "Next I require a welcome message."
-                                                            logs.set_footer(text="Aquhx msgs wizard",
+                                                            logs.set_footer(text="Cairo msgs wizard",
                                                                             icon_url=self.client.user.avatar_url)
                                                             await sent.edit(embed=logs)
                                                             try:
@@ -407,35 +407,35 @@ class config(Cog):
                                                                     'message',
                                                                     timeout=60.0,
                                                                     check=lambda message: message.author == ctx.author and message.channel == ctx.channel)
-                                                                res = await self.client.db.fetchrow("SELECT msg FROM aquhx.goodbye WHERE guild_id = $1", ctx.guild.id)
+                                                                res = await self.client.db.fetchrow("SELECT msg FROM db.goodbye WHERE guild_id = $1", ctx.guild.id)
                                                                 if res == None:
-                                                                    await self.client.db.execute("INSERT INTO aquhx.goodbye(guild_id, msg) VALUES($1, $2)", ctx.guild.id, msgs)
+                                                                    await self.client.db.execute("INSERT INTO db.goodbye(guild_id, msg) VALUES($1, $2)", ctx.guild.id, msgs)
                                                                     logs = discord.Embed(
                                                                         color=color)
                                                                     logs.set_author(
-                                                                        name="Aquhx msgs wizard")
+                                                                        name="Cairo msgs wizard")
                                                                     logs.description = "✅ Set goodbye message."
-                                                                    logs.set_footer(text="Aquhx msgs wizard",
+                                                                    logs.set_footer(text="Cairo msgs wizard",
                                                                                     icon_url=self.client.user.avatar_url)
                                                                     await sent.edit(embed=logs)
                                                                 elif res != None:
-                                                                    await self.client.db.execute("UPDATE aquhx.goodbye SET msg = $1 WHERE guild_id = $2", msgs, ctx.guild.id)
+                                                                    await self.client.db.execute("UPDATE db.goodbye SET msg = $1 WHERE guild_id = $2", msgs, ctx.guild.id)
                                                                     logs = discord.Embed(
                                                                         color=color)
                                                                     logs.set_author(
-                                                                        name="Aquhx msgs wizard")
+                                                                        name="Cairo msgs wizard")
                                                                     logs.description = "✅ Updated goodbye message."
-                                                                    logs.set_footer(text="Aquhx msgs wizard",
+                                                                    logs.set_footer(text="Cairo msgs wizard",
                                                                                     icon_url=self.client.user.avatar_url)
                                                                     await sent.edit(embed=logs)
                                                                     await asyncio.sleep(3)
                                                                     em = discord.Embed(
                                                                         color=color)
                                                                     em.set_author(
-                                                                        name="Aquhx msgs wizard")
-                                                                    em.description = "✅ Completed all tasks, thank you for using Aquhx"
+                                                                        name="Cairo msgs wizard")
+                                                                    em.description = "✅ Completed all tasks, thank you for using Cairo"
                                                                     em.set_footer(
-                                                                        text="Aquhx msgs wizard", icon_url=self.client.user.avatar_url)
+                                                                        text="Cairo msgs wizard", icon_url=self.client.user.avatar_url)
                                                                 await sent.edit(embed=em)
                                                             except asyncio.TimeoutError:
                                                                 await ctx.send("You didn't respond in time")
@@ -452,7 +452,7 @@ class config(Cog):
 
                 elif msg.content == "dellogs":
                     try:
-                        result = await self.client.db.fetchrow(f"SELECT * FROM aquhx.modlog WHERE guild_id = $1", ctx.guild.id)
+                        result = await self.client.db.fetchrow(f"SELECT * FROM db.modlog WHERE guild_id = $1", ctx.guild.id)
                         if result is None:
 
                             em = discord.Embed(color=color,
@@ -460,7 +460,7 @@ class config(Cog):
 
                         elif result is not None:
 
-                            await self.client.db.execute("DELETE FROM aquhx.modlog WHERE guild_id = $1", ctx.guild.id)
+                            await self.client.db.execute("DELETE FROM db.modlog WHERE guild_id = $1", ctx.guild.id)
                             em = discord.Embed(color=color,
                                                description="✅ Removed the log channel from the database!")
                         await sent.edit(embed=em)
@@ -471,12 +471,12 @@ class config(Cog):
                 elif msg.content == "delmsgs":
                     try:
                         await msg.delete()
-                        res = await self.client.db.fetchrow("SELECT channel_id FROM aquhx.messages WHERE guild_id = $1", ctx.guild.id)
+                        res = await self.client.db.fetchrow("SELECT channel_id FROM db.messages WHERE guild_id = $1", ctx.guild.id)
                         if res == None:
                             em = discord.Embed(color=color)
                             em.description = "❌ You haven't configured a messages channel!"
                         elif res != None:
-                            await self.client.db.execute("DELETE FROM aquhx.messages WHERE guild_id = $1", ctx.guild.id)
+                            await self.client.db.execute("DELETE FROM db.messages WHERE guild_id = $1", ctx.guild.id)
                             em = discord.Embed(color=color,
                                                description="✅ Removed the messages channel from the database database!")
                         await sent.edit(embed=em)
@@ -508,13 +508,13 @@ class config(Cog):
             try:
                 if len(prefix) > 3:
                     await ctx.send("Can't have more than 3 letters")
-                res = await self.client.db.fetchrow("SELECT prefix FROM aquhx.prefixes WHERE guild_id = $1", ctx.guild.id)
+                res = await self.client.db.fetchrow("SELECT prefix FROM db.prefixes WHERE guild_id = $1", ctx.guild.id)
                 if res != None:
-                    await self.client.db.execute("UPDATE aquhx.prefixes SET prefix = $1 WHERE guild_id = $2", prefix, ctx.guild.id)
+                    await self.client.db.execute("UPDATE db.prefixes SET prefix = $1 WHERE guild_id = $2", prefix, ctx.guild.id)
                     await ctx.send("Set")
                 elif res == None:
-                    await self.client.db.execute("INSERT INTO aquhx.prefixes(guild_id, prefix) VALUES($1, $2)", ctx.guild.id, "$")
-                    await self.client.db.execute("UPDATE aquhx.prefixes SET prefix = $1 WHERE guild_id = $2", prefix, ctx.guild.id)
+                    await self.client.db.execute("INSERT INTO db.prefixes(guild_id, prefix) VALUES($1, $2)", ctx.guild.id, "$")
+                    await self.client.db.execute("UPDATE db.prefixes SET prefix = $1 WHERE guild_id = $2", prefix, ctx.guild.id)
                     await ctx.send("Set")
             except Exception as e:
                 await ctx.send("{}" .format(e))

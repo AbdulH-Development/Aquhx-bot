@@ -71,7 +71,7 @@ def get_prefix(client, message):
     conn = psycopg2.connect(**dbinfo2)
     cursor = conn.cursor()
     cursor.execute(
-        'SELECT prefix FROM aquhx.prefixes WHERE guild_id = %s', (message.guild.id, ))
+        'SELECT prefix FROM db.prefixes WHERE guild_id = %s', (message.guild.id, ))
     prefix = cursor.fetchone()[0]
     return when_mentioned_or(prefix)(client, message)
 
