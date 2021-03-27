@@ -102,14 +102,6 @@ class Client(BotBase):
                 self.load_extension(f'lib.extensions.{filename[:-3]}')
                 print(f'[INFO] Loaded lib/extensions/{filename[:-3]}.py')
 
-        try:
-            pool = await asyncpg.create_pool(**dbinfo)
-            pg_con = await pool.acquire()
-            sql = open('lib/config/db/create.sql', 'r')
-            await pg_con.execute(sql.read())
-        finally:
-            await pool.release(pg_con)
-
     async def on_command_error(self, ctx, error):
         if hasattr(ctx.command, 'on_error'):
             return
