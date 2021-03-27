@@ -42,13 +42,13 @@ class Developer(commands.Cog):
             await self.client.logout()
             await self.client.close()
             if platform.system() == "Windows":
-                os.system('python.exe lib/Scripts/dev-restart.py')
+                os.system('python.exe lib/Scripts/non-dev-restart.py')
                 os.system('cls')
             elif platform.system() == "Linux":
-                os.system('python3 lib/Scripts/dev-restart.py')
+                os.system('python3 lib/Scripts/non-dev-restart.py')
                 os.system('clear')
             elif platform.system() == "Darwin":
-                os.system('python3 lib/Scripts/dev-restart.py')
+                os.system('python3 lib/Scripts/non-dev-restart.py')
                 os.system('clear')
         elif ctx.author.id not in OWNER_IDS:
             em = Embed(color=color)
