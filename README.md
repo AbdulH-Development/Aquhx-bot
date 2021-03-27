@@ -1,10 +1,10 @@
 <img align="right" src=".github/Aquhx.png">
 
-# Aquhx bot
+# Cairo bot
 
 One of the best discord bots out there
 
-[![Aquhx-bot](https://github.com/Aquhx-Development/Aquhx-bot/actions/workflows/Aquhx.yml/badge.svg)](https://github.com/Aquhx-Development/Aquhx-bot/actions/workflows/Aquhx.yml)
+[![Cairo-bot](https://github.com/Aquhx-Development/Aquhx-bot/actions/workflows/Aquhx.yml/badge.svg)](https://github.com/Aquhx-Development/Aquhx-bot/actions/workflows/Aquhx.yml)
 
 ## Should you use it?
 
