@@ -27,6 +27,7 @@ from dotenv import load_dotenv
 from discord import Intents
 from discord import Embed
 from discord.ext import commands
+from discord.ext.commands import Cog
 from discord import Embed
 import platform
 import psycopg2
