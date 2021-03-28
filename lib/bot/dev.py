@@ -25,10 +25,10 @@ from discord.ext.commands import when_mentioned_or
 from discord.ext.commands import command
 from discord.ext.commands import Cog
 from dotenv import load_dotenv
-from discord import Intents
 from discord import Embed
 from discord.ext import commands
 from discord import Embed
+from discord import *
 import platform
 import psycopg2
 import asyncio
@@ -73,7 +73,7 @@ class Client(BotBase):
     def __init__(self):
         self.OWNER = OWNER_IDS
         super().__init__(command_prefix=PREFIX, help_command=None,
-                         owners=OWNER_IDS, case_insensitive=True, perms=Intents.all())
+                         owners=OWNER_IDS, case_insensitive=True, intents=Intents.all())
         self.check = "<a:greentick:825189056295862292>"
         self.fail = "<a:redX:825192396655427595>"
 
@@ -187,21 +187,21 @@ class Developer(commands.Cog):
 
     @command(aliases=['restart'])
     async def _restart(self, ctx):
-        em = Embed(color=color)
-        em.description = f"{self.check} Restarted bot"
-        await ctx.send(embed=em)
         if ctx.author.id in OWNER_IDS:
+            em = Embed(color=color)
+            em.description = f"{self.check} Restarted bot"
+            await ctx.send(embed=em)
             await self.client.logout()
             await self.client.close()
             if platform.system() == "Windows":
-                os.system('python.exe lib/Scripts/dev-restart.py')
                 os.system('cls')
+                os.system('python.exe lib/Scripts/dev-restart.py')
             elif platform.system() == "Linux":
-                os.system('python3 lib/Scripts/dev-restart.py')
                 os.system('clear')
+                os.system('python3 lib/Scripts/dev-restart.py')
             elif platform.system() == "Darwin":
+                os.system("clear")
                 os.system('python3 lib/Scripts/dev-restart.py')
-                os.system('clear')
         elif ctx.author.id not in OWNER_IDS:
             em = Embed(color=color)
             em.description = f"{self.fail} You don't have permission to run this."
@@ -209,7 +209,7 @@ class Developer(commands.Cog):
 
     @Cog.listener()
     async def on_member_join(self, member):
-        fetch = await self.client.db.fetchrow("SELECT channel_id FROM db.messages WHERE guild_id = $1", member.guild.id)
+        fetch = await self.client.db.fetchrow("SELECT channel_id FROM db.welcome WHERE guild_id = $1", member.guild.id)
         if fetch == None:
             return
         elif fetch != None:
@@ -217,17 +217,18 @@ class Developer(commands.Cog):
                 mention = member.mention
                 members = len(list(member.guild.members))
                 user = member.name
-                welcome = await self.client.db.fetchrow("SELECT welcome FROM db.welcome WHERE guild_id = $1", member.guild.id)
+                welcome = await self.client.db.fetchrow("SELECT msg FROM db.welcome WHERE guild_id = $1", member.guild.id)
                 if welcome == None:
                     return
-                channel = self.client.get_channel(int(fetch[0]))
-                await channel.send(str(welcome[0]).format(mention=mention, user=user, members=members))
+                elif welcome != None:
+                    channel = self.client.get_channel(int(fetch[0]))
+                    await channel.send(str(welcome[0]).format(mention=mention, user=user, members=members))
             except Exception as e:
-                pass
+                print(e)
 
     @Cog.listener()
     async def on_member_remove(self, member):
-        fetch = await self.client.db.fetchrow("SELECT channel_id FROM db.messages WHERE guild_id = $1", member.guild.id)
+        fetch = await self.client.db.fetchrow("SELECT channel_id FROM db.goodbye WHERE guild_id = $1", member.guild.id)
         if fetch == None:
             return
         elif fetch != None:
@@ -235,13 +236,30 @@ class Developer(commands.Cog):
                 mention = member.mention
                 members = len(list(member.guild.members))
                 user = member.name
-                welcome = await self.client.db.fetchrow("SELECT goodbye FROM db.goodbye WHERE guild_id = $1", member.guild.id)
+                welcome = await self.client.db.fetchrow("SELECT msg FROM db.goodbye WHERE guild_id = $1", member.guild.id)
                 if welcome == None:
                     return
-                channel = self.client.get_channel(int(fetch[0]))
-                await channel.send(str(welcome[0]).format(mention=mention, user=user, members=members))
+                elif welcome != None:
+                    channel = self.client.get_channel(int(fetch[0]))
+                    await channel.send(str(welcome[0]).format(mention=mention, user=user, members=members))
             except Exception as e:
                 pass
+            
+            
+    @Cog.listener()
+    async def on_member_ban(self, guild, member):
+        fetch = await self.client.db.fetchrow("SELECT channel_id FROM db.modlog WHERE guild_id = $1", guild.id)
+        if fetch == None:
+            return
+        elif fetch != None:
+            channel = self.client.get_channel(int(fetch[0]))
+            em = Embed(color=color)
+            em.set_author(
+                name=f"Member banned", icon_url=member.avatar_url)
+            em.description = f"**{member.name}{member.discriminator}** was banned\n from **{guild.name}**"
+            em.set_thumbnail(url=member.avatar_url)
+            await channel.send(embed=em)
+            
 
     @Cog.listener()
     async def on_guild_join(self, guild):
@@ -251,6 +269,9 @@ class Developer(commands.Cog):
     @Cog.listener()
     async def on_guild_remove(self, guild):
         await self.client.db.execute("DELETE FROM db.prefixes WHERE guild_id = $1", guild.id)
+        await self.client.db.execute("DELETE FROM db.welcome WHERE guild_id = $1", guild.id)
+        await self.client.db.execute("DELETE FROM db.goodbye WHERE guild_id = $1", guild.id)
+        await self.client.db.execute("DELETE FROM db.modlog WHERE guild_id = $1", guild.id)
 
     @Cog.listener()
     async def on_message_edit(self, before, after):
@@ -271,10 +292,10 @@ class Developer(commands.Cog):
                 channel = self.client.get_channel(int(result[0]))
                 em = Embed(color=color)
                 em.set_author(
-                    name=f"{after.author.name} triggered an event", icon_url=self.client.user.avatar_url)
+                    name=f"{after.author.name} triggered an event", icon_url=after.author.avatar_url)
                 em.description = f"""
                 {before.author.mention} edited their message\nin {before.channel.mention}.\n\nOld\n```{before.content}```\n\nNew\n```{after.content}```"""
-                em.set_thumbnail(url=self.client.user.avatar_url)
+                em.set_thumbnail(url=self.after.author.avatar_url)
                 await channel.send(embed=em)
             except Exception as e:
                 pass
@@ -292,10 +313,12 @@ class Developer(commands.Cog):
             elif result != None:
                 channel = self.client.get_channel(int(result[0]))
                 em = Embed(color=color)
+                em.set_author(
+                    name=f"{message.author.name} triggered an event", icon_url=message.author.avatar_url)
                 em.description = f"""
                 message by {message.author.mention} deleted\nin {message.channel.mention}\n\nContent\n```{message.content}```
                 """
-                em.set_thumbnail(url=self.client.user.avatar_url)
+                em.set_thumbnail(url=message.author.avatar_url)
                 await channel.send(embed=em)
 
 
