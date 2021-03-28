@@ -20,7 +20,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-from discord.ext.commands import command, Cog, has_permissions
+from discord.ext.commands import command, Cog, has_permissions, commands
 from ..bot import color
 from ..bot import dbinfo
 from discord import *
