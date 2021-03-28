@@ -20,7 +20,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-from discord.ext.commands import command, Cog, has_permissions, commands
+from discord.ext.commands import command, Cog, has_permissions
 from ..bot import color
 from ..bot import dbinfo
 from discord import *
@@ -366,8 +366,8 @@ class SetupClass(Cog):
                 text=f"Cairo setup wizard | Requested by {ctx.author.name}", icon_url=self.client.user.avatar_url)
             await sent.edit(embed=em)
 
-    @commands.command()
-    @commands.has_permissions(manage_messages=True)
+    @command()
+    @has_permissions(manage_messages=True)
     async def prefix(self, ctx, prefix: str = None):
         if prefix == None:
             em = Embed(color=color)
