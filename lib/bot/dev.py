@@ -84,7 +84,7 @@ class Client(BotBase):
         super().run(self.TOKEN, reconnect=True)
 
     async def on_ready(self):
-        f = open('lib/config/config.json', 'r')
+        f = open('lib/config.json', 'r')
         data = json.load(f)
         print(f"""
 [INFO] Logged in as {self.user}
@@ -148,7 +148,7 @@ class Client(BotBase):
             return
 
 
-f = open('lib/config/config.json', 'r')
+f = open('lib/config.json', 'r')
 data = json.load(f)
 client = Client()
 VERSION = data['Version']
