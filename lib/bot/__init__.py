@@ -82,7 +82,7 @@ class Client(BotBase):
         self.PREFIX = PREFIX
         self.OWNER = OWNER_IDS
         super().__init__(command_prefix=get_prefix, help_command=None,
-                         owners=OWNER_IDS, case_insensitive=True, perms=Intents.all())
+                         owners=OWNER_IDS, case_insensitive=True, intents=Intents.all())
 
     def run(self, version):
         load_dotenv()
