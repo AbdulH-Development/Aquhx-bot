@@ -218,6 +218,14 @@ class Fun(commands.Cog):
         em1.add_field(name="Clear", value="Purge some messages")
         em1.add_field(name="Setup", value="Setup some per server stuff")
         em1.add_field(name="Prefix", value="Set a custom prefix")
+        em1.add_field(name="Logs", value="Set up your logging channel")
+        em1.add_field(name="Welcome", value="Set up your welcome message")
+        em1.add_field(name="Goodbye", value="Set up your goodbye message")
+        em1.add_field(name="Welchan", value="Set up your Welcome channel")
+        em1.add_field(name="Goodchan", value="Set up your goodbye channel")
+        em1.add_field(name="Remwel", value="Remove every welcome item in the database")
+        em1.add_field(name="Remgood", value="Remove every goodbye items in the database")
+        em1.add_field(name="Remlogs", value="Remove your logs channel from the database")
         em1.set_footer(
             text=f"Requested by {ctx.author.name} at {current_time}", icon_url=ctx.author.avatar_url)
 

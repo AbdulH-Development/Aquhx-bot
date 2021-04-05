@@ -1,5 +1,3 @@
-
-
 # Cairo bot
 
 One of the best discord bots out there
