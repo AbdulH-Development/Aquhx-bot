@@ -49,7 +49,7 @@ load_dotenv()
 DB = os.getenv("DB")
 load_dotenv()
 KEY = os.getenv("API")
-base_url = "http://api.openweathermap.org/data/2.5/weather?"
+
 
 reddit = praw.Reddit(client_id='c_85u5DZ793OFQ',
                      client_secret='iBBJIhWmv6uB3E6R7UNlgC7t8Go',
@@ -145,20 +145,14 @@ class Fun(commands.Cog):
                           text=f"Requested by {ctx.author.name}")
             await ctx.send(embed=em)
         elif words != None:
-            try:
-                result = await self.client.db.fetchrow(f"SELECT channel_id FROM Cairo.modlog WHERE guild_id = $1", ctx.guild.id)
-                if result == None:
-                    await ctx.message.delete()
-                    await asyncio.sleep(.5)
-                    if "@everyone" in words:
-                        return
-                elif result != None:
-                    if "@everyone" in words:
-                        return
-                    await ctx.message.delete()
-                await ctx.send("{}".format(words))
-            finally:
+            await ctx.message.delete()
+            if "@everyone" in words:
                 return
+            if "@here" in words:
+                return
+            else:
+                await ctx.send("{}" .format(words))
+
 
     @commands.command()
     async def embed(self, ctx, *, words=None):
@@ -174,35 +168,18 @@ class Fun(commands.Cog):
                           text=f"Requested by {ctx.author.name}")
             await ctx.send(embed=em)
         elif words != None:
-            if "@here" in words:
-                if ctx.author.advanced:
-                    await ctx.message.delete()
-                    await asyncio.sleep(.5)
-                    em = discord.Embed(color=color)
-                    em.set_author(icon_url=ctx.author.avatar_url,
-                                  name=ctx.author.name)
-                    em.description = "{}" .format(words)
-                    await ctx.send(embed=em)
-                else:
-                    return
-            elif "@everyone" in words:
-                if ctx.author.advanced:
-                    await ctx.message.delete()
-                    await asyncio.sleep(.5)
-                    em = discord.Embed(color=color)
-                    em.set_author(icon_url=ctx.author.avatar_url,
-                                  name=ctx.author.name)
-                    em.description = "{}" .format(words)
-                    await ctx.send(embed=em)
-                else:
-                    return
             await ctx.message.delete()
-            await asyncio.sleep(.5)
-            em = discord.Embed(color=color)
-            em.set_author(icon_url=ctx.author.avatar_url,
+            if "@here" in words:
+                return
+            elif "@everyone" in words:
+                return
+            else:
+                await asyncio.sleep(.5)
+                em = discord.Embed(color=color)
+                em.set_author(icon_url=ctx.author.avatar_url,
                           name=ctx.author.name)
-            em.description = "{}" .format(words)
-            await ctx.send(embed=em)
+                em.description = "{}" .format(words)
+                await ctx.send(embed=em)
 
     @commands.command(aliases=['vote'])
     async def poll(self, ctx, *, words):

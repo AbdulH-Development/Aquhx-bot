@@ -21,74 +21,53 @@ SOFTWARE.
 """
 
 from discord.ext.commands import Bot as BotBase
-from discord.ext.commands import when_mentioned_or
-from discord.ext.commands import command
+from discord.ext.commands import *
+from discord.ext import *
 from dotenv import load_dotenv
-from discord import Intents
-from discord import Embed
-from discord.ext import commands
-from discord.ext.commands import Cog
-from discord import Embed
+from discord import Intents, Embed
+from lib.bot.info import *
 import platform
 import psycopg2
+import mariadb
 import asyncio
-import asyncpg
 import math
 import json
 import os
 
 
-load_dotenv()
-IP = os.getenv("IP")
-load_dotenv()
-PASSWD = os.getenv("PASSWD")
-load_dotenv()
-DB = os.getenv("DB")
-
-
-dbinfo = {
-    'user': 'postgres',
-    'host': IP,
-    'password': PASSWD,
-    'database': DB,
-    'max_inactive_connection_lifetime': 5
-}
-
-dbinfo2 = {
-    'user': 'postgres',
-    'host': IP,
-    'password': PASSWD,
-    'database': DB,
-    'port': 5432
-}
-
-
-PREFIX = when_mentioned_or("$")
-OWNER_IDS = [541722893747224589]
 color = 0xfffafa
-
+OWNER_IDS = [541722893747224589]
 
 def get_prefix(client, message):
-    conn = psycopg2.connect(**dbinfo2)
-    cursor = conn.cursor()
-    cursor.execute(
-        'SELECT prefix FROM db.prefixes WHERE guild_id = %s', (message.guild.id, ))
-    prefix = cursor.fetchone()[0]
-    return when_mentioned_or(prefix)(client, message)
+    try:
+        conn = mariadb.connect(**dbinfo)
+        cursor = conn.cursor()
+        cursor.execute(
+            'SELECT prefix FROM prefixes WHERE guild_id = ?', (message.guild.id, ))
+        prefix = cursor.fetchone()[0]
+        return when_mentioned_or(prefix)(client, message)
+    except KeyError:
+        cursor.execute(
+            "INSERT INTO prefixes (guild_id, prefix) VALUES (?, ?)", (message.guild.id, "$",))
+        return when_mentioned_or(prefix)(client, message)
 
 
 class Client(BotBase):
     def __init__(self):
-        self.PREFIX = PREFIX
         self.OWNER = OWNER_IDS
         super().__init__(command_prefix=get_prefix, help_command=None,
                          owners=OWNER_IDS, case_insensitive=True, intents=Intents.all())
 
     def run(self, version):
-        load_dotenv()
-        self.TOKEN = os.getenv("AQUHX")
-        self.VERSION = version
-        super().run(self.TOKEN, reconnect=True)
+        try:
+            load_dotenv()
+            self.TOKEN = os.getenv("AQUHX")
+            self.VERSION = version
+            super().run(self.TOKEN, reconnect=True)
+        except KeyboardInterrupt:
+            print("Shutting down")
+        except RuntimeError:
+            print("Interrupted")
 
     async def on_ready(self):
         f = open('lib/config.json', 'r')
@@ -97,11 +76,11 @@ class Client(BotBase):
 [INFO] Logged in as {self.user}
 [INFO] Bot version: {data['Version']}
 [INFO] Created by: {data['Owner']}
-[INFO] Collaboraters {data['Collaboraters']}""")
-        for filename in os.listdir('./lib/extensions'):
-            if filename.endswith('.py'):
-                self.load_extension(f'lib.extensions.{filename[:-3]}')
-                print(f'[INFO] Loaded lib/extensions/{filename[:-3]}.py')
+[INFO] Collaboraters {data['Collaboraters']}""" )
+        for cog in os.listdir("./lib/extensions"):
+            if cog.endswith('.py'):
+                client.load_extension(f"lib.extensions.{cog[:-3]}")
+                print(f"[INFO] Loaded lib/extensions/{cog[:-3]}.py")
 
     async def on_command_error(self, ctx, error):
         if hasattr(ctx.command, 'on_error'):
@@ -111,18 +90,18 @@ class Client(BotBase):
 
         error = getattr(error, 'original', error)
 
-        if isinstance(error, commands.ChannelNotFound):
+        if isinstance(error, ChannelNotFound):
             em = Embed(color=0xff0000)
             em.description = 'Could not find that channel'
             await ctx.send(embed=em)
             return
-        if isinstance(error, commands.CommandOnCooldown):
+        if isinstance(error, CommandOnCooldown):
             em = Embed(color=0xff0000)
             em.description = 'The command you have attempted to execute is on cooldown.\nPlease try again in {}s.'.format(
                 math.ceil(error.retry_after))
             await ctx.send(embed=em)
             return
-        if isinstance(error, commands.MissingPermissions):
+        if isinstance(error, MissingPermissions):
             missing = [perm.replace('_', ' ').replace(
                 'guild', 'server').title() for perm in error.missing_perms]
             if len(missing) > 2:
@@ -135,7 +114,7 @@ class Client(BotBase):
                 perms)
             await ctx.send(embed=em)
             return
-        if isinstance(error, commands.BotMissingPermissions):
+        if isinstance(error, BotMissingPermissions):
             missing = [perm.replace('_', ' ').replace(
                 'guild', 'server').title() for perm in error.missing_perms]
             if len(missing) > 2:
@@ -148,7 +127,7 @@ class Client(BotBase):
                 perms)
             await ctx.send(embed=em)
             return
-        if isinstance(error, commands.CommandNotFound):
+        if isinstance(error, CommandNotFound):
             em = Embed(color=0xff0000)
             em.description = "[ERROR] Unknown command"
             await ctx.send(embed=em)
@@ -159,14 +138,20 @@ f = open('lib/config.json', 'r')
 data = json.load(f)
 client = Client()
 VERSION = data['Version']
-
-
 async def create_db_pool():
-    pool = await asyncpg.create_pool(**dbinfo)
-    client.db = await pool.acquire()
+    try:
+        client.db = mariadb.connect(**dbinfo)
+        client.db.auto_reconnect = True
+        client.cursor = client.db.cursor()
+    except mariadb.InterfaceError:
+        client.db = mariadb.reconnect(**dbinfo)
+        client.cursor = client.db.cursor()
+    client.color = 0xfffafa
+    client.complete = "<a:greentick:825189056295862292>"
+    client.fail = "<a:redX:825192396655427595>"
 
 
-class Developer(commands.Cog):
+class Developer(Cog):
     def __init__(self, client):
         self.client = client
         self.check = "<a:greentick:825189056295862292>"
@@ -202,13 +187,13 @@ class Developer(commands.Cog):
             await self.client.close()
             if platform.system() == "Windows":
                 os.system('cls')
-                os.system('python.exe lib/Scripts/dev-restart.py')
+                os.system('python.exe lib/Scripts/non-dev-restart.py')
             elif platform.system() == "Linux":
                 os.system('clear')
-                os.system('python3 lib/Scripts/dev-restart.py')
+                os.system('python3 lib/Scripts/non-dev-restart.py')
             elif platform.system() == "Darwin":
                 os.system("clear")
-                os.system('python3 lib/Scripts/dev-restart.py')
+                os.system('python3 lib/Scripts/non-dev-restart.py')
         elif ctx.author.id not in OWNER_IDS:
             em = Embed(color=color)
             em.description = f"{self.fail} You don't have permission to run this."
@@ -216,7 +201,9 @@ class Developer(commands.Cog):
 
     @Cog.listener()
     async def on_member_join(self, member):
-        fetch = await self.client.db.fetchrow("SELECT channel_id FROM db.welcome WHERE guild_id = $1", member.guild.id)
+        self.client.cursor.execute(
+            "SELECT channel_id FROM welcome WHERE guild_id = ?", (member.guild.id,))
+        fetch = self.client.cursor.fetchone()
         if fetch == None:
             return
         elif fetch != None:
@@ -224,18 +211,23 @@ class Developer(commands.Cog):
                 mention = member.mention
                 members = len(list(member.guild.members))
                 user = member.name
-                welcome = await self.client.db.fetchrow("SELECT msg FROM db.welcome WHERE guild_id = $1", member.guild.id)
+                guild = member.guild.name
+                self.client.db.execute(
+                    "SELECT msg FROM welcome WHERE guild_id = ?", (member.guild.id,))
+                welcome = self.client.db.fetchone()
                 if welcome == None:
                     return
                 elif welcome != None:
                     channel = self.client.get_channel(int(fetch[0]))
-                    await channel.send(str(welcome[0]).format(mention=mention, user=user, members=members))
+                    await channel.send(str(welcome[0]).format(mention=mention, user=user, members=members, guild=guild))
             except Exception as e:
                 print(e)
 
     @Cog.listener()
     async def on_member_remove(self, member):
-        fetch = await self.client.db.fetchrow("SELECT channel_id FROM db.goodbye WHERE guild_id = $1", member.guild.id)
+        self.client.cursor.execute(
+            "SELECT channel_id FROM goodbye WHERE guild_id = ?", (member.guild.id,))
+        fetch = self.client.cursor.fetchone()
         if fetch == None:
             return
         elif fetch != None:
@@ -243,18 +235,21 @@ class Developer(commands.Cog):
                 mention = member.mention
                 members = len(list(member.guild.members))
                 user = member.name
-                welcome = await self.client.db.fetchrow("SELECT msg FROM db.goodbye WHERE guild_id = $1", member.guild.id)
+                guild = member.guild.name
+                welcome = await self.client.db.execute("SELECT msg FROM goodbye WHERE guild_id = ?", (member.guild.id, ))
                 if welcome == None:
                     return
                 elif welcome != None:
                     channel = self.client.get_channel(int(fetch[0]))
-                    await channel.send(str(welcome[0]).format(mention=mention, user=user, members=members))
+                    await channel.send(str(welcome[0]).format(mention=mention, user=user, members=members, guild=guild))
             except Exception as e:
                 pass
 
     @Cog.listener()
     async def on_member_ban(self, guild, member):
-        fetch = await self.client.db.fetchrow("SELECT channel_id FROM db.modlog WHERE guild_id = $1", guild.id)
+        self.client.cursor.execute(
+            "SELECT channel_id FROM modlog WHERE guild_id = ?", (guild.id,))
+        fetch = self.client.cursor.fetchone()
         if fetch == None:
             return
         elif fetch != None:
@@ -269,23 +264,31 @@ class Developer(commands.Cog):
     @Cog.listener()
     async def on_guild_join(self, guild):
         await guild.create_role(name="Muted")
-        await self.client.db.execute("INSERT INTO db.prefixes(guild_id, prefix) VALUES($1, $2)", guild.id, "$")
+        self.client.cursor.execute(
+            "INSERT INTO prefixes (guild_id, prefix) VALUES (?, ?)", (guild.id, "$",))
+        self.client.db.commit()
 
     @Cog.listener()
     async def on_guild_remove(self, guild):
-        await self.client.db.execute("DELETE FROM db.prefixes WHERE guild_id = $1", guild.id)
-        await self.client.db.execute("DELETE FROM db.welcome WHERE guild_id = $1", guild.id)
-        await self.client.db.execute("DELETE FROM db.goodbye WHERE guild_id = $1", guild.id)
-        await self.client.db.execute("DELETE FROM db.modlog WHERE guild_id = $1", guild.id)
+        self.client.cursor.execute(
+            "DELETE FROM prefixes WHERE guild_id = ?", (guild.id, ))
+        self.client.cursor.execute(
+            "DELETE FROM welcome WHERE guild_id = ?", (guild.id, ))
+        self.client.cursor.execute(
+            "DELETE FROM goodbye WHERE guild_id = ?", (guild.id, ))
+        self.client.cursor.execute(
+            "DELETE FROM modlog WHERE guild_id = ?", (guild.id,))
+        self.client.db.commit()
 
     @Cog.listener()
     async def on_message_edit(self, before, after):
-        if after.author == self.client.user:
+        if before.author == self.client.user:
             return
-        if after.author.bot:
+        if before.author.bot:
             return
-
-        result = await self.client.db.fetchrow("SELECT channel_id FROM db.modlog WHERE guild_id = $1", after.guild.id)
+        self.client.cursor.execute(
+            'SELECT channel_id FROM modlog WHERE guild_id = ?', (before.guild.id, ))
+        result = self.client.cursor.fetchone()
         if result == None:
             return
         msg = str(before.content)
@@ -300,10 +303,10 @@ class Developer(commands.Cog):
                     name=f"{after.author.name} triggered an event", icon_url=after.author.avatar_url)
                 em.description = f"""
                 {before.author.mention} edited their message\nin {before.channel.mention}.\n\nOld\n```{before.content}```\n\nNew\n```{after.content}```"""
-                em.set_thumbnail(url=self.after.author.avatar_url)
+                em.set_thumbnail(url=after.author.avatar_url)
                 await channel.send(embed=em)
             except Exception as e:
-                pass
+                print(e)
 
     @Cog.listener()
     async def on_message_delete(self, message):
@@ -312,7 +315,9 @@ class Developer(commands.Cog):
         if message.author.bot:
             return
         elif message.author != self.client.user:
-            result = await self.client.db.fetchrow('SELECT channel_id FROM db.modlog WHERE guild_id = $1', message.guild.id)
+            self.client.cursor.execute(
+                'SELECT channel_id FROM modlog WHERE guild_id = ?', (message.guild.id, ))
+            result = self.client.cursor.fetchone()
             if result == None:
                 return
             elif result != None:
@@ -325,6 +330,8 @@ class Developer(commands.Cog):
                 """
                 em.set_thumbnail(url=message.author.avatar_url)
                 await channel.send(embed=em)
+
+
 
 
 client.add_cog(Developer(client))

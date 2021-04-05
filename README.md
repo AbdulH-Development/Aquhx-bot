@@ -4,7 +4,9 @@
 
 One of the best discord bots out there
 
-[![Cairo-bot](https://github.com/Aquhx-Development/Aquhx-bot/actions/workflows/Aquhx.yml/badge.svg)](https://github.com/Aquhx-Development/Aquhx-bot/actions/workflows/Aquhx.yml)
+[![Cairo-bot](https://github.com/Aquhx-Development/Aquhx-bot/actions/workflows/Aquhx.yml/badge.svg)](https://github.com/Aquhx-Development/Aquhx-bot/actions/workflows/Cairo.yml)
+[![Python-version](https://img.shields.io/badge/Python-3.8.7-blue?style=flat-square)](https://python.org/downloads)
+[![MysQL](https://img.shields.io/badge/MySQL-10.2-blue?style=flat-square)](https://mariadb.org/)
 
 ## Should you use it?
 
@@ -17,21 +19,10 @@ maybe a dashboard
 ## Technichal information
 
 The bot was developed using discord.py (obviously)\
-and it uses a PostgreSQL database.\
+and it uses a MySQL database.\
 To run the code you need: [Python \>=
 3.8.6](https://python.org/downloads) and pip.\
 To install the packages either use the\
 requirements.txt file or\
 the [INST-Package-manager](https://abdulh.xyz/apps) using the
 [config.json](https://github.com/Aquhx-Development/Aquhx-bot/blob/main/lib/config/config.json)
-
-To run it just do
-
-```bash
-pip install -r requirements.txt
-```
-then
-```bash
-python main.py
-```
- 
