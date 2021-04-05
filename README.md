@@ -4,7 +4,7 @@
 
 One of the best discord bots out there
 
-[![Cairo-bot](https://github.com/Aquhx-Development/Aquhx-bot/actions/workflows/Aquhx.yml/badge.svg)](https://github.com/Aquhx-Development/Aquhx-bot/actions/workflows/Cairo.yml)
+[![Cairo-bot](https://github.com/Cairo-Development/Cairo-bot/actions/workflows/Cairo.yml/badge.svg)](https://github.com/Cairo-Development/Cairo-bot/actions/workflows/Cairo.yml)
 [![Python-version](https://img.shields.io/badge/Python-3.8.7-blue?style=flat-square)](https://python.org/downloads)
 [![MysQL](https://img.shields.io/badge/MySQL-10.2-blue?style=flat-square)](https://mariadb.org/)
 
