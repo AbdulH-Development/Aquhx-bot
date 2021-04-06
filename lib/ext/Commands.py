@@ -36,28 +36,10 @@ from random import randint
 from typing import List, Union
 from discord.ext import commands
 from discord.ext.commands import BucketType, cooldown
+from ..bot.info import *
 
 
 color = 0xfffafa  # 0xff4500  # 0x4B0082
-
-
-load_dotenv()
-IP = os.getenv("IP")
-load_dotenv()
-PASSWD = os.getenv("PASSWD")
-load_dotenv()
-DB = os.getenv("DB")
-load_dotenv()
-KEY = os.getenv("API")
-
-
-reddit = praw.Reddit(client_id='c_85u5DZ793OFQ',
-                     client_secret='iBBJIhWmv6uB3E6R7UNlgC7t8Go',
-                     username="Electronbot123",
-                     password="Electronbot123",
-                     user_agent="Memes",
-                     check_for_async=False)
-
 
 class Fun(commands.Cog):
     def __init__(self, client):

@@ -34,27 +34,8 @@ import math
 import json
 import os
 
-
-color = 0xfffafa
-OWNER_IDS = [541722893747224589]
-
-def get_prefix(client, message):
-    try:
-        conn = mariadb.connect(**dbinfo)
-        cursor = conn.cursor()
-        cursor.execute(
-            'SELECT prefix FROM prefixes WHERE guild_id = ?', (message.guild.id, ))
-        prefix = cursor.fetchone()[0]
-        return when_mentioned_or(prefix)(client, message)
-    except KeyError:
-        cursor.execute(
-            "INSERT INTO prefixes (guild_id, prefix) VALUES (?, ?)", (message.guild.id, "$",))
-        return when_mentioned_or(prefix)(client, message)
-
-
 class Client(BotBase):
     def __init__(self):
-        self.OWNER = OWNER_IDS
         super().__init__(command_prefix=get_prefix, help_command=None,
                          owners=OWNER_IDS, case_insensitive=True, intents=Intents.all())
 
@@ -72,15 +53,19 @@ class Client(BotBase):
     async def on_ready(self):
         f = open('lib/config.json', 'r')
         data = json.load(f)
+        r = 50
+        for i in range(r):
+            print_percent_done(i, r)
+            await asyncio.sleep(.02)
         print(f"""
 [INFO] Logged in as {self.user}
 [INFO] Bot version: {data['Version']}
 [INFO] Created by: {data['Owner']}
 [INFO] Collaboraters {data['Collaboraters']}""" )
-        for cog in os.listdir("./lib/extensions"):
+        for cog in os.listdir("./lib/ext"):
             if cog.endswith('.py'):
-                client.load_extension(f"lib.extensions.{cog[:-3]}")
-                print(f"[INFO] Loaded lib/extensions/{cog[:-3]}.py")
+                client.load_extension(f"lib.ext.{cog[:-3]}")
+                print(f"[INFO] Loaded lib/ext/{cog[:-3]}.py")
 
     async def on_command_error(self, ctx, error):
         if hasattr(ctx.command, 'on_error'):
@@ -165,37 +150,37 @@ class Developer(Cog):
                     if cog.endswith('.py'):
                         self.client.reload_extension(
                             f'lib.extensions.{cog[:-3]}')
-                em = Embed(color=color)
+                em = Embed(color=self.client.color)
                 em.description = f"{self.check} Reloaded extensions"
                 await ctx.send(embed=em)
             except Exception as e:
-                em = Embed(color=color)
+                em = Embed(color=self.client.color)
                 em.description = f"{self.fail} {e}".format(e)
                 await ctx.send(embed=em)
         elif ctx.author.id not in OWNER_IDS:
-            em = Embed(color=color)
+            em = Embed(color=self.client.color)
             em.description = f"{self.fail} You don't have permission to run this."
             await ctx.send(embed=em)
 
     @command(aliases=['restart'])
     async def _restart(self, ctx):
         if ctx.author.id in OWNER_IDS:
-            em = Embed(color=color)
+            em = Embed(color=self.client.color)
             em.description = f"{self.check} Restarted bot"
             await ctx.send(embed=em)
             await self.client.logout()
             await self.client.close()
             if platform.system() == "Windows":
                 os.system('cls')
-                os.system('python.exe lib/Scripts/non-dev-restart.py')
+                os.system('python.exe main.py')
             elif platform.system() == "Linux":
                 os.system('clear')
-                os.system('python3 lib/Scripts/non-dev-restart.py')
+                os.system('python3 main.py')
             elif platform.system() == "Darwin":
                 os.system("clear")
-                os.system('python3 lib/Scripts/non-dev-restart.py')
+                os.system('python3 main.py')
         elif ctx.author.id not in OWNER_IDS:
-            em = Embed(color=color)
+            em = Embed(color=self.client.color)
             em.description = f"{self.fail} You don't have permission to run this."
             await ctx.send(embed=em)
 
@@ -254,7 +239,7 @@ class Developer(Cog):
             return
         elif fetch != None:
             channel = self.client.get_channel(int(fetch[0]))
-            em = Embed(color=color)
+            em = Embed(color=self.client.color)
             em.set_author(
                 name=f"Member banned", icon_url=member.avatar_url)
             em.description = f"**{member.name}{member.discriminator}** was banned\n from **{guild.name}**"
@@ -280,6 +265,8 @@ class Developer(Cog):
             "DELETE FROM modlog WHERE guild_id = ?", (guild.id,))
         self.client.db.commit()
 
+
+
     @Cog.listener()
     async def on_message_edit(self, before, after):
         if before.author == self.client.user:
@@ -298,7 +285,7 @@ class Developer(Cog):
         elif result != None:
             try:
                 channel = self.client.get_channel(int(result[0]))
-                em = Embed(color=color)
+                em = Embed(color=self.client.color)
                 em.set_author(
                     name=f"{after.author.name} triggered an event", icon_url=after.author.avatar_url)
                 em.description = f"""
@@ -322,7 +309,7 @@ class Developer(Cog):
                 return
             elif result != None:
                 channel = self.client.get_channel(int(result[0]))
-                em = Embed(color=color)
+                em = Embed(color=self.client.color)
                 em.set_author(
                     name=f"{message.author.name} triggered an event", icon_url=message.author.avatar_url)
                 em.description = f"""

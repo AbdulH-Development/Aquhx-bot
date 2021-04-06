@@ -21,12 +21,10 @@ SOFTWARE.
 """
 
 from discord.ext.commands import command, Cog, has_permissions
-from ..bot import color
-from ..bot import dbinfo
 from discord import *
 import asyncio
 import time
-
+color = 0xfffafa
 
 class SetupClass(Cog):
     def __init__(self, client):

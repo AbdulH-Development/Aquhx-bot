@@ -43,22 +43,6 @@ load_dotenv()
 DB = os.getenv("DB")
 
 
-dbinfo = {
-    'user': 'postgres',
-    'host': IP,
-    'password': PASSWD,
-    'database': DB,
-    'max_inactive_connection_lifetime': 5
-}
-
-dbinfo2 = {
-    'user': 'postgres',
-    'host': IP,
-    'password': PASSWD,
-    'database': DB,
-    'port': 5432
-}
-
 
 PREFIX = when_mentioned_or(".")
 OWNER_IDS = [541722893747224589]
@@ -82,16 +66,19 @@ class Client(BotBase):
     async def on_ready(self):
         f = open('lib/config.json', 'r')
         data = json.load(f)
+        r = 30
+        for i in range(r):
+            print_percent_done(i, r)
+            time.sleep(.02)
         print(f"""
 [INFO] Logged in as {self.user}
 [INFO] Bot version: {data['Version']}
 [INFO] Created by: {data['Owner']}
 [INFO] Collaboraters {data['Collaboraters']}""")
-        for filename in os.listdir('./lib/extensions'):
-            if filename.endswith('.py'):
-                self.load_extension(f'lib.extensions.{filename[:-3]}')
-                print(f'[INFO] Loaded lib/extensions/{filename[:-3]}.py')
-
+        for cog in os.listdir("./lib/ext"):
+            if cog.endswith('.py'):
+                client.load_extension(f"lib.ext.{cog[:-3]}")
+                print(f"[INFO] Loaded lib/ext/{cog[:-3]}.py")
     async def on_command_error(self, ctx, error):
         if hasattr(ctx.command, 'on_error'):
             return
