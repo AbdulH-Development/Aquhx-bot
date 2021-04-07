@@ -66,10 +66,6 @@ class Client(BotBase):
     async def on_ready(self):
         f = open('lib/config.json', 'r')
         data = json.load(f)
-        r = 30
-        for i in range(r):
-            print_percent_done(i, r)
-            time.sleep(.02)
         print(f"""
 [INFO] Logged in as {self.user}
 [INFO] Bot version: {data['Version']}
