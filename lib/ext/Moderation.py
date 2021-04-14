@@ -68,8 +68,8 @@ class administrator(commands.Cog):
             await ctx.send(embed=em)
         elif member != None:
             try:
-                self.client.db.execute(f"SELECT channel_id FROM modlog WHERE guild_id = ?", (ctx.guild.id, ))
-                result = self.client.db.fetchone()
+                self.client.cursor.execute(f"SELECT channel_id FROM modlog WHERE guild_id = ?", (ctx.guild.id, ))
+                result = self.client.cursor.fetchone()
                 if result == None:
                     c = await member.create_dm()
                     await c.send(f"You have been banned from **{ctx.guild.name}**, **Reason:** {reason}" .format(reason))
@@ -122,9 +122,9 @@ class administrator(commands.Cog):
             await ctx.send(embed=em)
         elif member != None:
             try:
-                self.client.db.execute(
+                self.client.cursor.execute(
                     f"SELECT channel_id FROM modlog WHERE guild_id = ?", (ctx.guild.id, ))
-                result = self.client.db.fetchone()
+                result = self.client.cursor.fetchone()
                 if result == None:
                     c = await member.create_dm()
                     await c.send(f"You have been kicked from **{ctx.guild.name}**, **Reason:** {reason}" .format(reason))
@@ -177,9 +177,9 @@ class administrator(commands.Cog):
             await ctx.send(embed=em)
         elif userID != None:
             try:
-                self.client.db.execute(
+                self.client.cursor.execute(
                     f"SELECT channel_id FROM modlog WHERE guild_id = ?", (ctx.guild.id, ))
-                result = self.client.db.fetchone()
+                result = self.client.cursor.fetchone()
                 if result == None:
                     username = await self.client.fetch_user(int(userID))
                     user = discord.Object(id=userID)
@@ -230,9 +230,9 @@ class administrator(commands.Cog):
             await ctx.send(embed=em)
         elif amount != None:
             try:
-                self.client.db.execute(
+                self.client.cursor.execute(
                     f"SELECT channel_id FROM modlog WHERE guild_id = ?", (ctx.guild.id, ))
-                result = self.client.db.fetchone()
+                result = self.client.cursor.fetchone()
                 if result == None:
                     await ctx.channel.purge(limit=amount + 1)
                     em = discord.Embed(color=discord.Color.green())
@@ -281,9 +281,9 @@ class administrator(commands.Cog):
             await ctx.send(embed=em)
         elif member != None:
             try:
-                self.client.db.execute(
+                self.client.cursor.execute(
                     f"SELECT channel_id FROM modlog WHERE guild_id = ?", (ctx.guild.id, ))
-                result = self.client.db.fetchone()
+                result = self.client.cursor.fetchone()
                 role = get(ctx.guild.roles, name="Muted")
                 if result == None:
                     await ctx.message.delete()
@@ -330,9 +330,9 @@ class administrator(commands.Cog):
             await ctx.send(embed=em)
         elif member != None:
             try:
-                self.client.db.execute(
+                self.client.cursor.execute(
                     f"SELECT channel_id FROM modlog WHERE guild_id = ?", (ctx.guild.id, ))
-                result = self.client.db.fetchone()
+                result = self.client.cursor.fetchone()
                 role = get(ctx.guild.roles, name="Muted")
                 if result == None:
                     await ctx.message.delete()

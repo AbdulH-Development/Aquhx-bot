@@ -110,13 +110,13 @@ class SetupClass(Cog):
             try:
                 if len(prefix) > 3:
                     await ctx.send("Can't have more than 3 letters")
-                self.client.cursor.execute("SELECT prefix FROM prefixes WHERE guild_id = ?", (ctx.guild.id,))
+                self.client.cursor.execute("SELECT prefix FROM prefixes WHERE guild_id = ?", (ctx.guild.id, ))
                 res = self.client.cursor.fetchone()
                 if res != None:
                     self.client.cursor.execute("UPDATE prefixes SET prefix = ? WHERE guild_id = ?", (prefix, ctx.guild.id, ))
                 elif res == None:
                     self.client.cursor.execute("INSERT INTO prefixes(guild_id, prefix) VALUES(?, ?)", (ctx.guild.id, "$", ))
-                    self.client.cursor.execute("UPDATE prefixes SET prefix = ? WHERE guild_id = ?", (prefix, ctx.guild.id,))
+                    self.client.cursor.execute("UPDATE prefixes SET prefix = ? WHERE guild_id = ?", (prefix, ctx.guild.id, ))
                 self.client.db.commit()
                 em = Embed(color=color)
                 em.description = f"{self.check} Set the prefix to {prefix}"

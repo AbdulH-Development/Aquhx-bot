@@ -34,6 +34,7 @@ import math
 import json
 import os
 
+
 class Client(BotBase):
     def __init__(self):
         super().__init__(command_prefix=get_prefix, help_command=None,
@@ -51,13 +52,11 @@ class Client(BotBase):
             print("Interrupted")
 
     async def on_ready(self):
-        f = open('lib/config.json', 'r')
-        data = json.load(f)
         print(f"""
 [INFO] Logged in as {self.user}
-[INFO] Bot version: {data['Version']}
-[INFO] Created by: {data['Owner']}
-[INFO] Collaboraters {data['Collaboraters']}""" )
+[INFO] Bot version: 2.0.6
+[INFO] Created by: DevCairo
+[INFO] Collaboraters Mossyegghead01, AFK_Pilot""")
         for cog in os.listdir("./lib/ext"):
             if cog.endswith('.py'):
                 client.load_extension(f"lib.ext.{cog[:-3]}")
@@ -115,21 +114,33 @@ class Client(BotBase):
             return
 
 
-f = open('lib/config.json', 'r')
-data = json.load(f)
 client = Client()
-VERSION = data['Version']
+VERSION = "2.0.6"
+
+
 async def create_db_pool():
     try:
         client.db = mariadb.connect(**dbinfo)
         client.db.auto_reconnect = True
         client.cursor = client.db.cursor()
+        client.cursor.execute("SET SESSION wait_timeout=12000")
     except mariadb.InterfaceError:
         client.db = mariadb.reconnect(**dbinfo)
+        client.db.auto_reconnect = True
         client.cursor = client.db.cursor()
     client.color = 0xfffafa
     client.complete = "<a:greentick:825189056295862292>"
     client.fail = "<a:redX:825192396655427595>"
+
+
+@tasks.loop(seconds=12000)
+async def dbstuff():
+    client.db = mariadb.connect(**dbinfo)
+    client.cursor = client.db.cursor()
+    client.cursor.execute("SET SESSION wait_timeout=12000")
+
+
+dbstuff.start()
 
 
 class Developer(Cog):
@@ -142,10 +153,10 @@ class Developer(Cog):
     async def _reload(self, ctx):
         if ctx.author.id in OWNER_IDS:
             try:
-                for cog in os.listdir('./lib/extensions'):
+                for cog in os.listdir('./lib/ext'):
                     if cog.endswith('.py'):
                         self.client.reload_extension(
-                            f'lib.extensions.{cog[:-3]}')
+                            f'lib.ext.{cog[:-3]}')
                 em = Embed(color=self.client.color)
                 em.description = f"{self.check} Reloaded extensions"
                 await ctx.send(embed=em)
@@ -182,54 +193,85 @@ class Developer(Cog):
 
     @Cog.listener()
     async def on_member_join(self, member):
-        self.client.cursor.execute(
-            "SELECT channel_id FROM welcome WHERE guild_id = ?", (member.guild.id,))
+        try:
+            self.client.cursor.execute(
+                "SELECT welchan FROM welcome WHERE guild_id = ?", (member.guild.id, ))
+        except mariadb.InterfaceError:
+            self.client.db = mariadb.connect(**dbinfo)
+            self.client.db.auto_reconnect = True
+            self.client.cursor = client.db.cursor()
+            self.client.cursor.execute(
+                "SELECT welchan FROM welcome WHERE guild_id = ?", (member.guild.id, ))
         fetch = self.client.cursor.fetchone()
         if fetch == None:
             return
         elif fetch != None:
+            mention = member.mention
+            members = len(list(member.guild.members))
+            user = member.name
+            guild = member.guild.name
             try:
-                mention = member.mention
-                members = len(list(member.guild.members))
-                user = member.name
-                guild = member.guild.name
-                self.client.db.execute(
-                    "SELECT msg FROM welcome WHERE guild_id = ?", (member.guild.id,))
-                welcome = self.client.db.fetchone()
-                if welcome == None:
-                    return
-                elif welcome != None:
-                    channel = self.client.get_channel(int(fetch[0]))
-                    await channel.send(str(welcome[0]).format(mention=mention, user=user, members=members, guild=guild))
-            except Exception as e:
-                print(e)
+                self.client.cursor.execute(
+                    "SELECT welcome FROM welcome WHERE guild_id = ?", (member.guild.id, ))
+            except mariadb.InterfaceError:
+                self.client.db = mariadb.connect(**dbinfo)
+                self.client.db.auto_reconnect = True
+                self.client.cursor = client.db.cursor()
+                self.client.cursor.execute(
+                    "SELECT welcome FROM welcome WHERE guild_id = ?", (member.guild.id, ))
+            welcome = self.client.cursor.fetchone()
+            if welcome == None:
+                return
+            elif welcome != None:
+                channel = self.client.get_channel(int(fetch[0]))
+                await channel.send(str(welcome[0]) .format(mention=mention, user=user, members=members, guild=guild))
 
     @Cog.listener()
     async def on_member_remove(self, member):
-        self.client.cursor.execute(
-            "SELECT channel_id FROM goodbye WHERE guild_id = ?", (member.guild.id,))
+        try:
+            self.client.cursor.execute(
+                "SELECT goodchan FROM goodbye WHERE guild_id = ?", (member.guild.id, ))
+        except mariadb.InterfaceError:
+            self.client.db = mariadb.connect(**dbinfo)
+            self.client.db.auto_reconnect = True
+            self.client.cursor = client.db.cursor()
+            self.client.cursor.execute(
+                "SELECT goodchan FROM goodbye WHERE guild_id = ?", (member.guild.id, ))
         fetch = self.client.cursor.fetchone()
         if fetch == None:
             return
         elif fetch != None:
+            mention = member.mention
+            members = len(list(member.guild.members))
+            user = member.name
+
             try:
-                mention = member.mention
-                members = len(list(member.guild.members))
-                user = member.name
-                guild = member.guild.name
-                welcome = await self.client.db.execute("SELECT msg FROM goodbye WHERE guild_id = ?", (member.guild.id, ))
-                if welcome == None:
-                    return
-                elif welcome != None:
-                    channel = self.client.get_channel(int(fetch[0]))
-                    await channel.send(str(welcome[0]).format(mention=mention, user=user, members=members, guild=guild))
-            except Exception as e:
-                pass
+                self.client.cursor.execute(
+                    "SELECT goodbye FROM goodbye WHERE guild_id = ?", (member.guild.id, ))
+            except mariadb.InterfaceError:
+                self.client.db = mariadb.connect(**dbinfo)
+                self.client.db.auto_reconnect = True
+                self.client.cursor = client.db.cursor()
+                self.client.cursor.execute(
+                    "SELECT goodbye FROM goodbye WHERE guild_id = ?", (member.guild.id, ))
+            welcome = self.client.cursor.fetchone()
+            if welcome == None:
+                return
+            elif welcome != None:
+                channel = self.client.get_channel(int(fetch[0]))
+                await channel.send(str(welcome[0]) .format(mention=mention, user=user, members=members))
 
     @Cog.listener()
     async def on_member_ban(self, guild, member):
-        self.client.cursor.execute(
-            "SELECT channel_id FROM modlog WHERE guild_id = ?", (guild.id,))
+        try:
+            self.client.cursor.execute(
+                "SELECT channel_id FROM modlog WHERE guild_id = ?", (guild.id,))
+        except mariadb.InterfaceError:
+            self.client.db = mariadb.connect(**dbinfo)
+            self.client.db.auto_reconnect = True
+            self.client.cursor = client.db.cursor()
+            self.client.cursor.execute(
+                "SELECT channel_id FROM modlog WHERE guild_id = ?", (guild.id,))
         fetch = self.client.cursor.fetchone()
         if fetch == None:
             return
@@ -245,23 +287,41 @@ class Developer(Cog):
     @Cog.listener()
     async def on_guild_join(self, guild):
         await guild.create_role(name="Muted")
-        self.client.cursor.execute(
-            "INSERT INTO prefixes (guild_id, prefix) VALUES (?, ?)", (guild.id, "$",))
+        try:
+            self.client.cursor.execute(
+                "INSERT INTO prefixes (guild_id, prefix) VALUES (?, ?)", (guild.id, "$",))
+        except mariadb.InterfaceError:
+            self.client.db = mariadb.connect(**dbinfo)
+            self.client.db.auto_reconnect = True
+            self.client.cursor = client.db.cursor()
+            self.client.cursor.execute(
+                "INSERT INTO prefixes (guild_id, prefix) VALUES (?, ?)", (guild.id, "$",))
         self.client.db.commit()
 
     @Cog.listener()
     async def on_guild_remove(self, guild):
-        self.client.cursor.execute(
-            "DELETE FROM prefixes WHERE guild_id = ?", (guild.id, ))
-        self.client.cursor.execute(
-            "DELETE FROM welcome WHERE guild_id = ?", (guild.id, ))
-        self.client.cursor.execute(
-            "DELETE FROM goodbye WHERE guild_id = ?", (guild.id, ))
-        self.client.cursor.execute(
-            "DELETE FROM modlog WHERE guild_id = ?", (guild.id,))
+        try:
+            self.client.cursor.execute(
+                "DELETE FROM prefixes WHERE guild_id = ?", (guild.id, ))
+            self.client.cursor.execute(
+                "DELETE FROM welcome WHERE guild_id = ?", (guild.id, ))
+            self.client.cursor.execute(
+                "DELETE FROM goodbye WHERE guild_id = ?", (guild.id, ))
+            self.client.cursor.execute(
+                "DELETE FROM modlog WHERE guild_id = ?", (guild.id,))
+        except mariadb.InterfaceError:
+            self.client.db = mariadb.connect(**dbinfo)
+            self.client.db.auto_reconnect = True
+            self.client.cursor = client.db.cursor()
+            self.client.cursor.execute(
+                "DELETE FROM prefixes WHERE guild_id = ?", (guild.id, ))
+            self.client.cursor.execute(
+                "DELETE FROM welcome WHERE guild_id = ?", (guild.id, ))
+            self.client.cursor.execute(
+                "DELETE FROM goodbye WHERE guild_id = ?", (guild.id, ))
+            self.client.cursor.execute(
+                "DELETE FROM modlog WHERE guild_id = ?", (guild.id,))
         self.client.db.commit()
-
-
 
     @Cog.listener()
     async def on_message_edit(self, before, after):
@@ -269,8 +329,15 @@ class Developer(Cog):
             return
         if before.author.bot:
             return
-        self.client.cursor.execute(
-            'SELECT channel_id FROM modlog WHERE guild_id = ?', (before.guild.id, ))
+        try:
+            self.client.cursor.execute(
+                'SELECT channel_id FROM modlog WHERE guild_id = ?', (before.guild.id,))
+        except mariadb.InterfaceError:
+            self.client.db = mariadb.connect(**dbinfo)
+            self.client.db.auto_reconnect = True
+            self.client.cursor = client.db.cursor()
+            self.client.cursor.execute(
+                'SELECT channel_id FROM modlog WHERE guild_id = ?', (before.guild.id,))
         result = self.client.cursor.fetchone()
         if result == None:
             return
@@ -298,8 +365,15 @@ class Developer(Cog):
         if message.author.bot:
             return
         elif message.author != self.client.user:
-            self.client.cursor.execute(
-                'SELECT channel_id FROM modlog WHERE guild_id = ?', (message.guild.id, ))
+            try:
+                self.client.cursor.execute(
+                    'SELECT channel_id FROM modlog WHERE guild_id = ?', (message.guild.id,))
+            except mariadb.InterfaceError:
+                self.client.db = mariadb.connect(**dbinfo)
+                self.client.db.auto_reconnect = True
+                self.client.cursor = client.db.cursor()
+                self.client.cursor.execute(
+                    'SELECT channel_id FROM modlog WHERE guild_id = ?', (message.guild.id,))
             result = self.client.cursor.fetchone()
             if result == None:
                 return
@@ -313,8 +387,6 @@ class Developer(Cog):
                 """
                 em.set_thumbnail(url=message.author.avatar_url)
                 await channel.send(embed=em)
-
-
 
 
 client.add_cog(Developer(client))

@@ -2,6 +2,7 @@
 import time
 import sys
 import mariadb
+from discord.ext.commands import when_mentioned_or
 from discord.ext.commands import *
 from discord.ext import *
 from dotenv import load_dotenv
@@ -54,16 +55,12 @@ def convertTuple(tup):
     str = ''.join(tup)
     return str
 
+
 def get_prefix(client, message):
-    try:
-        conn = mariadb.connect(**dbinfo)
-        cursor = conn.cursor()
-        cursor.execute(
-            'SELECT prefix FROM prefixes WHERE guild_id = ?', (message.guild.id, ))
-        prefix = cursor.fetchone()[0]
-        prefixes = convertTuple(prefix)
-        return when_mentioned_or(prefixes)(client, message)
-    except KeyError:
-        cursor.execute(
-            "INSERT INTO prefixes (guild_id, prefix) VALUES (?, ?)", (message.guild.id, "$",))
-        return when_mentioned_or(prefixes)(client, message)
+    conn = mariadb.connect(**dbinfo)
+    cursor = conn.cursor()
+    cursor.execute(
+        'SELECT prefix FROM prefixes WHERE guild_id = ?', (message.guild.id, ))
+    prefix = cursor.fetchone()[0]
+    prefixes = convertTuple(prefix)
+    return when_mentioned_or(prefixes)(client, message)
