@@ -22,7 +22,9 @@ SOFTWARE.
 
 from discord.ext.commands import Bot as BotBase
 from discord.ext.commands import *
+from discord_slash import SlashCommand, SlashContext
 from discord.ext import *
+from discord.ext import tasks
 from dotenv import load_dotenv
 from discord import Intents, Embed
 from lib.bot.info import *
@@ -116,7 +118,6 @@ class Client(BotBase):
 
 client = Client()
 VERSION = "2.0.6"
-
 
 async def create_db_pool():
     try:

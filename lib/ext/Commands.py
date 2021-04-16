@@ -36,6 +36,7 @@ from random import randint
 from typing import List, Union
 from discord.ext import commands
 from discord.ext.commands import BucketType, cooldown
+from discord_slash import SlashCommand
 from ..bot.info import *
 
 
@@ -44,6 +45,13 @@ color = 0xfffafa  # 0xff4500  # 0x4B0082
 class Fun(commands.Cog):
     def __init__(self, client):
         self.client = client
+    
+    @commands.command()
+    async def invite(self, ctx):
+        em = discord.Embed(color=self.client.color)
+        em.title = "You seem to be enjoying the bot!"
+        em.description = "Please invite the bot if you like it!\n**[Link](https://discord.com/oauth2/authorize?client_id=796594693865078825&permissions=3728076022&scope=bot)**"
+        await ctx.send(embed=em)
 
     @commands.command(aliases=['meme'])
     @commands.cooldown(1, 10, BucketType.user)
@@ -220,6 +228,7 @@ class Fun(commands.Cog):
         em3.add_field(name="Memes", value="Get memes from reddit!")
         em3.add_field(name="Kitten", value="Get pictures of adorable kittens!")
         em3.add_field(name="Puppy", value="Get pictures of adorable puppies!")
+        em3.add_field(name="Invite", value="Invite the bot!")
         em3.set_footer(
             text=f"Requested by {ctx.author.name} at {current_time}", icon_url=ctx.author.avatar_url)
         msg = await ctx.send(embed=em3)

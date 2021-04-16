@@ -61,6 +61,6 @@ def get_prefix(client, message):
     cursor = conn.cursor()
     cursor.execute(
         'SELECT prefix FROM prefixes WHERE guild_id = ?', (message.guild.id, ))
-    prefix = cursor.fetchone()[0]
+    prefix = cursor.fetchone()
     prefixes = convertTuple(prefix)
-    return when_mentioned_or(prefixes)(client, message)
+    return when_mentioned_or(prefixes[0])(client, message)
