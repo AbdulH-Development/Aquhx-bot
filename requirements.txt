@@ -1,6 +1,4 @@
-discord.py>=1.6.0
-
-lavalink>=3.1.4
+discord.py>=1.7.1
 
 python-dotenv>=0.15.0
 
@@ -8,4 +6,8 @@ praw>=7.2.0
 
 mariadb>=1.0.6
 
-discord-py-slash-command>=1.1.2
+toml>=0.10.2
+
+aiomysql>=0.0.21
+
+colorama>=0.4.4 

@@ -1,0 +1,32 @@
+# Created April 25th 2021
+
+title = "Config for Cairo"
+
+[info]
+version = "2.0.7"
+owners = "DevCairo"
+collaborators = "DevCairo, Mossyegghead"
+dob="Jan 6, 2021"
+
+# Sensitive information below
+
+[database]
+server = ""
+user = ""
+password = ""
+database = ""
+
+[client]
+description = ""
+token = ""
+beta = ""
+
+[error]
+cmdnf = 600
+chnf = 601
+ronf = 602
+usnf = 603
+menf = 604
+misperms = 605
+botmisperms = 606
+
