@@ -20,7 +20,7 @@
     <img src="https://img.shields.io/badge/10.4-MariaDB%20version-%23C0765A?logo=MariaDB&style=for-the-badge" />
 </a><br>
 
-<a href="">
+<a href="https://discord.gg/x3jn5W5Bby">
   <img src="https://img.shields.io/badge/-Join%20the%20discord!-%235865F2?style=for-the-badge&logo=discord&logoColor=white"><br>
 </a>
 
