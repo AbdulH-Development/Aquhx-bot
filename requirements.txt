@@ -4,7 +4,7 @@ python-dotenv>=0.15.0
 
 praw>=7.2.0
 
-mariadb>=1.0.5
+mariadb
 
 toml>=0.10.2
 
