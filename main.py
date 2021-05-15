@@ -5,4 +5,4 @@ license GPL v3, see LICENSE for more details.
 
 from lib.bot import client
 
-client.start()
+client.run(2.0)

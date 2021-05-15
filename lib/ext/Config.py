@@ -4,7 +4,6 @@ license GPL v3, see LICENSE for more details.
 """
 
 from discord.ext.commands import *
-from discord.ext import flags
 from discord.ext import *
 from colorama import Fore
 from discord import *
@@ -291,7 +290,7 @@ class Config(Cog):
                             await self.client.cursor.execute("SELECT title FROM welembed WHERE guild_id = %s", (ctx.guild.id, ))
                             fetch = await self.client.cursor.fetchone()
                             if fetch == None:
-                                await self.client.cursor.execute("INSERT INTO welembed(guild_id, title) VALUES(%s, %s)", (ctx,guild.id, msg.content))
+                                await self.client.cursor.execute("INSERT INTO welembed(guild_id, title) VALUES(%s, %s)", (ctx.guild.id, msg.content, ))
                             elif fetch != None:
                                 await self.client.cursor.execute("UPDATE welembed SET title = %s WHERE guild_id = %s", (msg.content, ctx.guild.id, ))
                             em = Embed(color=self.client.color)

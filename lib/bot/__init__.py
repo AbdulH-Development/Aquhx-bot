@@ -13,7 +13,7 @@ import warnings
 import platform
 import aiomysql
 import asyncio
-import mariadb
+import mariadb # pyflakes.ignore
 import toml
 import os
 
@@ -65,7 +65,6 @@ class Client(Base):
         data = toml.load(config)
         super().__init__(command_prefix=getServerPrefix, help_command=None,
                          description=data["client"]["description"], intents=Intents.all())
-
         self.database.start()
         self.loadCogs()
         self.check = "<a:success:836127425511292979>"
@@ -84,6 +83,9 @@ class Client(Base):
 
     @tasks.loop(seconds=12000)
     async def database(self):
+        """
+        Start database connection
+        """
         try:
             self.db = await aiomysql.connect(**Ext.logaccess)
             self.cursor = await self.db.cursor()
@@ -93,12 +95,13 @@ class Client(Base):
         except Exception as e:
             print(f"[ " + Fore.RED + "ERR!" + Fore.RESET + f" ] {e}")
 
-    def start(self):
+    def run(self, token):
         try:
             config = open("config.toml", 'r')
             data = toml.load(config)
             token = data["client"]["token"]
-            super().run(token, reconnect=True)
+            self.TOKEN = token
+            super().run(self.TOKEN)
         except KeyboardInterrupt:
             return
 
