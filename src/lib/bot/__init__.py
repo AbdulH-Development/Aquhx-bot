@@ -74,7 +74,7 @@ class Client(Base):
 
     def loadCogs(self):
         try:
-            for cog in os.listdir("lib/ext"):
+            for cog in os.listdir("src/lib/ext"):
                 if cog.endswith(".py"):
                     self.load_extension(f"lib.ext.{cog[:-3]}")
                     print("[ " + Fore.GREEN + "OK" + Fore.RESET + f" ] Loaded {cog}" + Fore.RESET)
